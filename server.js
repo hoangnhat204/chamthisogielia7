@@ -5,14 +5,26 @@ const path = require('path');
 const app = express();
 const port = 3000;
 
-// Cấu hình express-session và body-parser
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname)); // Phục vụ file tĩnh (như CSS)
 app.use(session({
     secret: 'my-secret-key-123',
     resave: false,
     saveUninitialized: true
 }));
+
+// Phục vụ file styles.css tĩnh
+app.get('/styles.css', (req, res) => {
+    res.sendFile(path.join(__dirname, 'styles.css'));
+});
+
+// Chuyển hướng truy cập .html trực tiếp về các route sạch tương ứng
+app.use((req, res, next) => {
+    if (req.path === '/index.html') return res.redirect('/');
+    if (req.path === '/admin.html') return res.redirect('/admin');
+    if (req.path === '/judge.html') return res.redirect('/judge');
+    if (req.path === '/login.html') return res.redirect('/login');
+    next();
+});
 
 // Hàm đọc dữ liệu người dùng
 const getUsers = () => JSON.parse(fs.readFileSync(path.join(__dirname, 'users.json'), 'utf8'));
