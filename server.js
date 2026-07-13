@@ -112,7 +112,7 @@ const requireAdmin = (req, res, next) => {
     if (req.session.user && req.session.user.role === 'admin') {
         next();
     } else {
-        res.status(403).send('Bạn không có quyền truy cập trang này. <a href="/">Về trang chủ</a>');
+        res.status(403).send('Bạn không có quyền truy cập trang này. <a href="/leaderboard">Về trang chủ</a>');
     }
 };
 
@@ -127,7 +127,15 @@ const requireJudge = (req, res, next) => {
 
 // Route hiển thị form đăng nhập
 app.get('/login', (req, res) => {
-    if (req.session.user) return res.redirect('/');
+    if (req.session.user) {
+        if (req.session.user.role === 'admin') {
+            return res.redirect('/admin');
+        } else if (req.session.user.role === 'judge') {
+            return res.redirect('/judge');
+        } else {
+            return res.redirect('/leaderboard');
+        }
+    }
     res.sendFile(path.join(__dirname, 'login.html'));
 });
 
@@ -144,7 +152,7 @@ app.post('/login', (req, res) => {
         } else if (user.role === 'judge') {
             res.redirect('/judge');
         } else {
-            res.redirect('/');
+            res.redirect('/leaderboard');
         }
     } else {
         res.redirect('/login?error=1');
@@ -178,7 +186,11 @@ app.get('/api/data', requireLogin, (req, res) => {
 });
 
 // Các route hiển thị trang giao diện
-app.get('/', requireLogin, (req, res) => {
+app.get('/', (req, res) => {
+    res.redirect('/login');
+});
+
+app.get('/leaderboard', requireLogin, (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
@@ -191,7 +203,7 @@ app.get('/judge', requireLogin, (req, res) => {
     if (req.session.user.role === 'judge' || req.session.user.role === 'admin') {
         res.sendFile(path.join(__dirname, 'judge.html'));
     } else {
-        res.status(403).send('Chỉ Ban giám khảo mới có quyền truy cập trang này. <a href="/">Về trang chủ</a>');
+        res.status(403).send('Chỉ Ban giám khảo mới có quyền truy cập trang này. <a href="/leaderboard">Về trang chủ</a>');
     }
 });
 
