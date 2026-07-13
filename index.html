@@ -3,10 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang chủ - Chấm Điểm Sổ Ghi Đầu Bài</title>
+    <title>Trang Chủ - Đường Lên Đỉnh Sogielia Mùa 7</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .profile-bar {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+    </style>
 </head>
 <body>
-    <h1>Trang chủ</h1>
-    <p>Nội dung trang chủ sẽ nằm ở đây.</p>
+    <div class="header-nav">
+        <div class="profile-bar" id="user-profile">
+            <!-- JS populated -->
+        </div>
+        <div class="action-buttons" style="display: flex; gap: 0.5rem;">
+            <a href="/admin" id="admin-link" style="display: none; margin-right: 1rem; align-self: center;">🔧 Vào Trang Admin</a>
+            <a href="/logout">🚪 Đăng xuất</a>
+        </div>
+    </div>
+
+    <!-- PHẦN 1: BẢNG XẾP HẠNG CHUNG (HIỂN THỊ CHO TẤT CẢ) -->
+    <div class="glass-container">
+        <h1>🏆 Bảng Xếp Hạng Thí Sinh</h1>
+        <p>Bảng điểm tổng hợp và xếp hạng thực tế của các thí sinh Đường Lên Đỉnh Sogielia Mùa 7.</p>
+        
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th style="width: 70px; text-align: center;">Hạng</th>
+                        <th>Thí sinh</th>
+                        <th>Đội Mentor phụ trách</th>
+                        <th style="width: 120px; text-align: center;">Điểm TB</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <tr>
+                        <td colspan="4" style="text-align: center; font-style: italic;">Đang tải dữ liệu xếp hạng...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let appData = { users: [], teams: [], candidates: [], scores: [] };
+
+        async function init() {
+            await fetchSessionUser();
+            await loadData();
+        }
+
+        async function fetchSessionUser() {
+            try {
+                const res = await fetch('/api/session-user');
+                if (res.ok) {
+                    currentUser = await res.json();
+                    renderProfileBar();
+                    if (currentUser.role === 'admin') {
+                        document.getElementById('admin-link').style.display = 'inline-block';
+                    }
+                }
+            } catch (err) {
+                console.error('Lỗi khi lấy thông tin session:', err);
+            }
+        }
+
+        function renderProfileBar() {
+            const profile = document.getElementById('user-profile');
+            if (!currentUser) return;
+            
+            let roleClass = 'badge-user';
+            let roleText = 'Người xem';
+            if (currentUser.role === 'admin') { roleClass = 'badge-admin'; roleText = 'Admin'; }
+            else if (currentUser.role === 'judge') { roleClass = 'badge-judge'; roleText = 'Giám khảo'; }
+
+            profile.innerHTML = `👋 Xin chào, <strong>${currentUser.username}</strong> <span class="badge ${roleClass}" style="margin-left: 0.5rem;">${roleText}</span>`;
+        }
+
+        async function loadData() {
+            try {
+                const res = await fetch('/api/data');
+                if (res.ok) {
+                    appData = await res.json();
+                    renderLeaderboard();
+                }
+            } catch (err) {
+                console.error('Lỗi khi tải dữ liệu:', err);
+            }
+        }
+
+        // 1. Render Bảng xếp hạng chung
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+
+            if (appData.candidates.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; font-style: italic;">Chưa có thí sinh nào tham gia.</td></tr>';
+                return;
+            }
+
+            // Tính điểm trung bình
+            const rankedCandidates = appData.candidates.map(cand => {
+                const candScores = appData.scores.filter(s => s.candidateId === cand.id);
+                
+                // Điểm trung bình Áo dài của các BGK
+                const v1Scores = candScores.filter(s => typeof s.aoDai !== 'undefined');
+                const avgAoDai = v1Scores.length > 0 ? (v1Scores.reduce((sum, s) => sum + s.aoDai, 0) / v1Scores.length) : 0;
+                
+                // Điểm trung bình Truyền cảm hứng của các BGK
+                const v2Scores = candScores.filter(s => typeof s.inspiration !== 'undefined');
+                const avgInspiration = v2Scores.length > 0 ? (v2Scores.reduce((sum, s) => sum + s.inspiration, 0) / v2Scores.length) : 0;
+                
+                // Điểm Kahoot của thí sinh
+                const scoreKahoot = cand.kahoot || 0;
+
+                // Điểm TB Tổng kết = (avgAoDai + avgInspiration + scoreKahoot) / 3
+                const avgScore = ((avgAoDai + avgInspiration + scoreKahoot) / 3).toFixed(2);
+                
+                return { ...cand, avgScore: parseFloat(avgScore) };
+            });
+
+            // Sắp xếp theo điểm trung bình giảm dần
+            rankedCandidates.sort((a, b) => {
+                if (a.avgScore === null) return 1;
+                if (b.avgScore === null) return -1;
+                return b.avgScore - a.avgScore;
+            });
+
+            rankedCandidates.forEach((cand, index) => {
+                const tr = document.createElement('tr');
+                
+                let rankText = index + 1;
+                let rankClass = '';
+                if (index === 0) rankClass = 'rank-1';
+                else if (index === 1) rankClass = 'rank-2';
+                else if (index === 2) rankClass = 'rank-3';
+
+                const avgDisplay = cand.avgScore !== null 
+                    ? `<span class="badge btn-success" style="font-size: 0.95rem;">${cand.avgScore.toFixed(2)}</span>` 
+                    : '<span style="color: var(--text-muted); font-style: italic;">Chưa chấm</span>';
+
+                // Lấy Đội Mentor
+                const team = appData.teams.find(t => t.id === cand.teamId);
+                const teamDisplay = team 
+                    ? `👥 <strong>${team.name}</strong> <span style="font-size:0.8rem; color:var(--text-muted);">(${team.mentors.join(' & ')})</span>`
+                    : '<span style="color: var(--text-muted); font-style: italic;">Chưa gán đội</span>';
+
+                tr.innerHTML = `
+                    <td style="text-align: center;"><strong class="${rankClass}">${rankText}</strong></td>
+                    <td><strong>👤 ${cand.sbd ? `[SBD ${cand.sbd}] ` : ''}${cand.name}</strong></td>
+                    <td>${teamDisplay}</td>
+                    <td style="text-align: center;">${avgDisplay}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Khởi chạy khi DOM đã load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>

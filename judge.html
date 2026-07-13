@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Ban Giám Khảo - Bán Kết Sogielia Mùa 7</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .judge-container {
+            max-width: 600px;
+            text-align: center;
+        }
+        .wizard-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 1.5rem;
+            text-align: left;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .round-badge {
+            background: rgba(100, 255, 218, 0.15);
+            color: var(--accent-blue);
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid var(--glass-border);
+        }
+        .candidate-name {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(100, 255, 218, 0.2);
+        }
+        .candidate-team {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+        .score-display-big {
+            font-size: 4.2rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            text-align: center;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 15px rgba(100, 255, 218, 0.4);
+        }
+        
+        /* Grid cho các ô điểm */
+        .score-buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.8rem;
+            margin: 1.5rem 0;
+        }
+        @media (max-width: 480px) {
+            .score-buttons-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .score-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .score-btn:hover {
+            background: rgba(100, 255, 218, 0.1);
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+        .score-btn.active {
+            background: var(--accent-blue);
+            color: #0a192f;
+            box-shadow: 0 0 15px rgba(100, 255, 218, 0.4);
+            border-color: var(--accent-blue);
+        }
+
+        .wizard-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .wizard-buttons button {
+            margin-top: 0;
+        }
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent-blue);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 8px var(--accent-blue);
+        }
+        .step-indicator {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-align: right;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .round-banner {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-nav">
+        <div id="user-profile" class="profile-bar">
+            <!-- JS populated -->
+        </div>
+        <a href="/logout">🚪 Đăng xuất</a>
+    </div>
+
+    <div class="glass-container judge-container">
+        <h1 style="font-size: 2.2rem; margin-bottom: 0.2rem;">Trang Ban Giám Khảo</h1>
+        <div class="round-banner">Đây là phần chấm điểm Bán kết</div>
+        
+        <div id="alert-container"></div>
+
+        <!-- DIỆN MẠO WIZARD CHẤM ĐIỂM -->
+        <div id="wizard-view" style="display: none;">
+            <div class="step-indicator" id="step-indicator-text">Thí sinh 1/1</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-bar-fill"></div>
+            </div>
+
+            <div class="wizard-card">
+                <div class="round-badge" id="round-badge-text">Vòng 1: Phần thi Áo Dài</div>
+                <div class="candidate-name" id="cand-name-text">Nguyễn Văn A</div>
+                <div class="candidate-team" id="cand-team-text">Đội Song Hành (mentor_viet & mentor_nam)</div>
+
+                <form id="score-form" onsubmit="handleFormSubmit(event)">
+                    <!-- Chỗ hiển thị điểm & ô chọn điểm -->
+                    <div style="margin: 1.5rem 0;">
+                        <div class="score-display-big" id="score-big-display">8.0</div>
+                        <div id="score-buttons-container">
+                            <!-- JS populated -->
+                        </div>
+                    </div>
+
+                    <div class="wizard-buttons">
+                        <button type="submit" class="btn-success" id="btn-next" style="width: 100%;">Gửi Điểm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- MÀN HÌNH CHUYỂN TIẾP VÒNG 1 -> VÒNG 2 -->
+        <div id="transition-view" style="display: none; padding: 2rem 0;">
+            <div class="section-card" style="text-align: center;">
+                <span style="font-size: 5rem;">🏁</span>
+                <h2 style="color: var(--accent-blue); margin-top: 1rem;">Đã Hết Vòng 1</h2>
+                <p style="margin: 1.5rem 0; font-size: 1.1rem; color: var(--text-main);">
+                    Bạn đã hoàn thành chấm điểm phần thi <strong>Áo Dài</strong> cho tất cả thí sinh.
+                </p>
+                <button class="btn-success" onclick="startRound2()" style="margin-top: 1rem;">👉 Chọn Vòng 2 (Truyền Cảm Hứng)</button>
+            </div>
+        </div>
+
+        <!-- MÀN HÌNH HOÀN THÀNH -->
+        <div id="completion-view" style="display: none; padding: 1.5rem 0;">
+            <div class="section-card" style="text-align: center;">
+                <span style="font-size: 4rem;">🏆</span>
+                <h2 style="color: var(--accent-blue); margin-top: 1rem; font-size: 1.8rem;">Đã Hoàn Thành Chấm Điểm</h2>
+                <p style="margin: 0.5rem 0 1.5rem 0; color: var(--text-muted); font-size: 0.95rem;">Dưới đây là bảng điểm bán kết bạn đã gửi lên hệ thống:</p>
+                
+                <div class="table-responsive" style="margin: 1.5rem 0; text-align: left;">
+                    <table class="custom-table" style="font-size: 0.9rem;">
+                        <thead>
+                            <tr>
+                                <th>Thí sinh</th>
+                                <th style="text-align: center; width: 140px;">Áo Dài (Vòng 1)</th>
+                                <th style="text-align: center; width: 160px;">Truyền Cảm Hứng (Vòng 2)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summary-table-body">
+                            <!-- JS populated -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <p style="font-style: italic; font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem;">
+                    ⚠️ Điểm số đã lưu trữ chính thức và không được chỉnh sửa.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentUser = null;
+        let appData = { users: [], teams: [], candidates: [], scores: [] };
+
+        // Quản lý trạng thái Wizard
+        let currentRound = 1; // 1, 2, 'transition', 'done'
+        let currentCandidateIndex = 0;
+        let selectedScore = 8.0;
+
+        const scoresList = [5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10];
+
+        async function init() {
+            await fetchSessionUser();
+            await loadData(true); // Lần đầu load thì khôi phục tiến trình tự động
+        }
+
+        async function fetchSessionUser() {
+            try {
+                const res = await fetch('/api/session-user');
+                if (res.ok) {
+                    currentUser = await res.json();
+                    renderProfileBar();
+                } else {
+                    window.location.href = '/login';
+                }
+            } catch (err) {
+                console.error('Lỗi lấy thông tin session:', err);
+            }
+        }
+
+        function renderProfileBar() {
+            const profile = document.getElementById('user-profile');
+            if (!currentUser) return;
+            profile.innerHTML = `👋 Giám khảo: <strong>${currentUser.username}</strong>`;
+        }
+
+        function showAlert(message, type = 'success') {
+            const container = document.getElementById('alert-container');
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 3000);
+        }
+
+        // Tải dữ liệu cuộc thi
+        async function loadData(autoResume = false) {
+            try {
+                const res = await fetch('/api/data');
+                if (res.ok) {
+                    appData = await res.json();
+                    
+                    if (autoResume) {
+                        resumeProgress();
+                    } else {
+                        renderWizard();
+                    }
+                }
+            } catch (err) {
+                console.error('Lỗi tải dữ liệu:', err);
+            }
+        }
+
+        // Tự động khôi phục tiến độ chấm điểm dựa trên điểm số đã lưu trong DB
+        function resumeProgress() {
+            const candidates = appData.candidates || [];
+            if (candidates.length === 0) {
+                renderWizard();
+                return;
+            }
+
+            // 1. Quét Vòng 1 (Áo Dài): tìm thí sinh đầu tiên chưa được chấm
+            let firstUnscoredV1Idx = -1;
+            for (let i = 0; i < candidates.length; i++) {
+                const score = appData.scores.find(s => s.candidateId === candidates[i].id && s.judge === currentUser.username);
+                if (!score || typeof score.aoDai === 'undefined') {
+                    firstUnscoredV1Idx = i;
+                    break;
+                }
+            }
+
+            if (firstUnscoredV1Idx !== -1) {
+                currentRound = 1;
+                currentCandidateIndex = firstUnscoredV1Idx;
+                renderWizard();
+                return;
+            }
+
+            // Nếu Vòng 1 đã hoàn tất nhưng chưa click nút qua Vòng 2, ta vẫn hiển thị nút transition nếu họ vừa chấm xong. 
+            // Tuy nhiên để tiện nhất: nếu tất cả V1 đã chấm nhưng chưa chấm V2 nào, cho họ bấm nút transition.
+            let firstUnscoredV2Idx = -1;
+            let scoredV2Count = 0;
+            for (let i = 0; i < candidates.length; i++) {
+                const score = appData.scores.find(s => s.candidateId === candidates[i].id && s.judge === currentUser.username);
+                if (!score || typeof score.inspiration === 'undefined') {
+                    if (firstUnscoredV2Idx === -1) firstUnscoredV2Idx = i;
+                } else {
+                    scoredV2Count++;
+                }
+            }
+
+            if (scoredV2Count === 0) {
+                // Đã chấm xong V1 nhưng chưa chấm V2 nào -> Show Transition
+                currentRound = 'transition';
+                renderWizard();
+                return;
+            }
+
+            if (firstUnscoredV2Idx !== -1) {
+                currentRound = 2;
+                currentCandidateIndex = firstUnscoredV2Idx;
+                renderWizard();
+                return;
+            }
+
+            // 3. Nếu đã chấm xong cả hai vòng
+            currentRound = 'done';
+            renderWizard();
+        }
+
+        // Render màn hình Wizard
+        function renderWizard() {
+            const wizardView = document.getElementById('wizard-view');
+            const transitionView = document.getElementById('transition-view');
+            const completionView = document.getElementById('completion-view');
+
+            if (currentRound === 'done') {
+                wizardView.style.display = 'none';
+                transitionView.style.display = 'none';
+                completionView.style.display = 'block';
+                
+                const summaryTbody = document.getElementById('summary-table-body');
+                summaryTbody.innerHTML = '';
+                (appData.candidates || []).forEach(cand => {
+                    const score = appData.scores.find(s => s.candidateId === cand.id && s.judge === currentUser.username);
+                    const valAoDai = score && typeof score.aoDai !== 'undefined' ? score.aoDai.toFixed(1) + 'đ' : '-';
+                    const valInspiration = score && typeof score.inspiration !== 'undefined' ? score.inspiration.toFixed(1) + 'đ' : '-';
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>👤 ${cand.sbd ? `[SBD ${cand.sbd}] ` : ''}${cand.name}</strong></td>
+                        <td style="text-align: center; color: var(--accent-blue); font-weight: bold;">${valAoDai}</td>
+                        <td style="text-align: center; color: #52c41a; font-weight: bold;">${valInspiration}</td>
+                    `;
+                    summaryTbody.appendChild(tr);
+                });
+                return;
+            }
+
+            if (currentRound === 'transition') {
+                wizardView.style.display = 'none';
+                transitionView.style.display = 'block';
+                completionView.style.display = 'none';
+                return;
+            }
+
+            wizardView.style.display = 'block';
+            transitionView.style.display = 'none';
+            completionView.style.display = 'none';
+
+            const candidates = appData.candidates || [];
+            if (candidates.length === 0) {
+                wizardView.innerHTML = '<p style="text-align:center; font-style:italic;">Không có thí sinh nào trong hệ thống.</p>';
+                return;
+            }
+
+            // Ràng buộc chỉ số
+            if (currentCandidateIndex >= candidates.length) {
+                currentCandidateIndex = candidates.length - 1;
+            }
+            if (currentCandidateIndex < 0) {
+                currentCandidateIndex = 0;
+            }
+
+            const currentCandidate = candidates[currentCandidateIndex];
+            const team = appData.teams.find(t => t.id === currentCandidate.teamId);
+            const teamName = team ? `${team.name} (${team.mentors.join(' & ')})` : 'Chưa gán';
+
+            // Cập nhật text thí sinh
+            document.getElementById('cand-name-text').textContent = (currentCandidate.sbd ? `[SBD ${currentCandidate.sbd}] ` : '') + currentCandidate.name;
+            document.getElementById('cand-team-text').textContent = `Đội: ${teamName}`;
+
+            // Cập nhật chỉ số tiến độ
+            const totalSteps = candidates.length;
+            const currentStep = currentCandidateIndex + 1;
+            document.getElementById('step-indicator-text').textContent = `Thí sinh ${currentStep} / ${totalSteps}`;
+            
+            // Tính phần trăm tiến độ
+            const percent = ((currentStep - 1) / totalSteps) * 100;
+            document.getElementById('progress-bar-fill').style.width = `${percent === 0 ? 5 : percent}%`;
+
+            // Lấy điểm đã lưu (nếu có)
+            const myScore = appData.scores.find(s => s.candidateId === currentCandidate.id && s.judge === currentUser.username);
+
+            if (currentRound === 1) {
+                document.getElementById('round-badge-text').textContent = 'Vòng 1: Phần thi Áo Dài';
+                document.getElementById('round-badge-text').style.borderColor = 'var(--accent-blue)';
+                if (myScore && typeof myScore.aoDai !== 'undefined') {
+                    selectedScore = myScore.aoDai;
+                } else {
+                    selectedScore = 8.0;
+                }
+            } else {
+                document.getElementById('round-badge-text').textContent = 'Vòng 2: Phần thi Truyền Cảm Hứng';
+                document.getElementById('round-badge-text').style.borderColor = '#52c41a';
+                if (myScore && typeof myScore.inspiration !== 'undefined') {
+                    selectedScore = myScore.inspiration;
+                } else {
+                    selectedScore = 8.0;
+                }
+            }
+
+            // Gán hiển thị số điểm lớn
+            document.getElementById('score-big-display').textContent = selectedScore.toFixed(1) + 'đ';
+
+            // Render các nút chọn điểm số
+            renderScoreButtons();
+
+            // Nút tiếp theo / Gửi
+            const btnNext = document.getElementById('btn-next');
+            const isLastCandidate = currentCandidateIndex === candidates.length - 1;
+            if (isLastCandidate) {
+                btnNext.textContent = currentRound === 1 ? 'Gửi & Hoàn Thành Vòng 1' : 'Gửi & Hoàn Thành Chấm Điểm';
+            } else {
+                btnNext.textContent = 'Gửi Điểm';
+            }
+        }
+
+        // Render các ô chọn điểm
+        function renderScoreButtons() {
+            const container = document.getElementById('score-buttons-container');
+            
+            let gridHTML = '<div class="score-buttons-grid">';
+            scoresList.forEach(val => {
+                const isActive = Math.abs(selectedScore - val) < 0.01;
+                gridHTML += `
+                    <div class="score-btn ${isActive ? 'active' : ''}" onclick="selectScoreVal(${val})">
+                        ${val.toFixed(1)}đ
+                    </div>
+                `;
+            });
+            gridHTML += '</div>';
+            
+            container.innerHTML = gridHTML;
+        }
+
+        // Click chọn điểm số
+        function selectScoreVal(val) {
+            selectedScore = val;
+            
+            // Xóa active cũ và thêm active mới
+            document.querySelectorAll('.score-btn').forEach(btn => {
+                if (parseFloat(btn.textContent) === val) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            document.getElementById('score-big-display').textContent = val.toFixed(1) + 'đ';
+        }
+
+        // Bắt đầu Vòng 2 từ Transition screen
+        function startRound2() {
+            currentRound = 2;
+            currentCandidateIndex = 0;
+            renderWizard();
+        }
+
+        // Xử lý gửi điểm
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const candidates = appData.candidates || [];
+            const currentCandidate = candidates[currentCandidateIndex];
+
+            const bodyParams = {
+                candidateId: currentCandidate.id
+            };
+
+            if (currentRound === 1) {
+                bodyParams.aoDai = selectedScore;
+            } else {
+                bodyParams.inspiration = selectedScore;
+            }
+
+            try {
+                const res = await fetch('/judge/score', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams(bodyParams)
+                });
+
+                if (res.ok) {
+                    // Load lại data ngầm để cập nhật điểm mới nhất
+                    await loadData(false);
+
+                    const isLastCandidate = currentCandidateIndex === candidates.length - 1;
+                    if (isLastCandidate) {
+                        if (currentRound === 1) {
+                            // Hết Vòng 1 -> sang màn hình chuyển tiếp
+                            currentRound = 'transition';
+                            showAlert('✅ Đã lưu điểm thí sinh cuối cùng của Vòng 1.');
+                        } else {
+                            // Hết Vòng 2 -> xong hẳn
+                            currentRound = 'done';
+                            showAlert('🎉 Đã hoàn thành chấm điểm tất cả thí sinh!');
+                        }
+                    } else {
+                        // Chuyển sang thí sinh tiếp theo
+                        currentCandidateIndex++;
+                        showAlert('✅ Đã lưu điểm.');
+                    }
+
+                    renderWizard();
+                } else {
+                    const errorMsg = await res.text();
+                    showAlert(`❌ Lưu điểm thất bại: ${errorMsg || 'Vui lòng thử lại!'}`, 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

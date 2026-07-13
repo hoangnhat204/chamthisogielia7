@@ -3,10 +3,792 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Admin - Chấm Điểm Sổ Ghi Đầu Bài</title>
+    <title>Bảng Điều Khiển Admin - Đường Lên Đỉnh Sogielia Mùa 7</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        .admin-container {
+            max-width: 1100px;
+        }
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .form-row .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .btn-inline {
+            align-self: flex-end;
+            margin-bottom: 1.5rem;
+            width: auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>Trang Admin</h1>
-    <p>Nội dung trang admin sẽ nằm ở đây.</p>
+    <div class="header-nav">
+        <a href="/">🏠 Về Trang Chủ</a>
+        <a href="/logout">🚪 Đăng xuất</a>
+    </div>
+
+    <div class="glass-container admin-container">
+        <h1>⚙️ Bảng Điều Khiển Admin</h1>
+        <p>Hệ thống quản lý tài khoản, đội mentor, thí sinh và bảng điểm Đường Lên Đỉnh Sogielia Mùa 7.</p>
+        
+        <div class="admin-tabs">
+            <button class="admin-tab active" onclick="switchTab('tab-users')">👥 Quản Lý Tài Khoản</button>
+            <button class="admin-tab" onclick="switchTab('tab-candidates')">👥 Quản Lý Đội & Thí Sinh</button>
+            <button class="admin-tab" onclick="switchTab('tab-scores')">📊 Bảng Điểm Bán Kết</button>
+        </div>
+
+        <div id="alert-container"></div>
+
+        <!-- TAB 1: QUẢN LÝ TÀI KHOẢN -->
+        <div id="tab-users" class="tab-content">
+            <div class="section-card">
+                <h3>➕ Tạo Tài Khoản Mới</h3>
+                <form id="add-user-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new_username">Tên tài khoản:</label>
+                            <input type="text" id="new_username" required placeholder="Tên đăng nhập...">
+                        </div>
+                        <div class="form-group">
+                            <label for="new_password">Mật khẩu:</label>
+                            <input type="password" id="new_password" required placeholder="Mật khẩu...">
+                        </div>
+                        <div class="form-group">
+                            <label for="new_role">Vai trò:</label>
+                            <select id="new_role">
+                                <option value="user">User thường (Viewer)</option>
+                                <option value="judge">Judge (Ban giám khảo)</option>
+                                <option value="admin">Admin (Quản trị viên)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-inline btn-small">Thêm</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="section-card">
+                <h3>📋 Danh Sách Tài Khoản</h3>
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Tên tài khoản</th>
+                                <th>Vai trò</th>
+                                <th style="width: 100px; text-align: center;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <!-- JS populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: QUẢN LÝ ĐỘI & THÍ SINH -->
+        <div id="tab-candidates" class="tab-content" style="display: none;">
+            <!-- BẢNG NHẬP LIỆU EXCEL -->
+            <div class="section-card" style="margin-bottom: 1.5rem;">
+                <h3>📥 Nhập Dữ Liệu Từ File Excel</h3>
+                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                    <input type="file" id="excel-file-input" accept=".xlsx, .xls" style="flex: 1; min-width: 250px; margin-bottom: 0; padding: 0.4rem;">
+                    <button class="btn-success" id="btn-import-excel" onclick="handleExcelImport()" style="width: auto; margin-top: 0;">Xem Trước & Nhập Dữ Liệu</button>
+                </div>
+                <div id="excel-preview-area" style="margin-top: 1.5rem; display: none; background: rgba(255,255,255,0.02); padding: 1.2rem; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.15);">
+                    <!-- JavaScript populated preview -->
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <!-- FORM TẠO ĐỘI -->
+                <div class="section-card">
+                    <h3>➕ Tạo Đội Mentor Mới (Đơn/Đôi)</h3>
+                    <form id="add-team-form">
+                        <div class="form-group">
+                            <label for="team_name">Tên đội:</label>
+                            <input type="text" id="team_name" required placeholder="Ví dụ: Đội Song Hành, Team Alpha...">
+                        </div>
+                        <div class="form-group">
+                            <label for="team_mentor1">Tên Mentor 1:</label>
+                            <input type="text" id="team_mentor1" required placeholder="Nhập họ tên Mentor 1...">
+                        </div>
+                        <div class="form-group">
+                            <label for="team_mentor2">Tên Mentor 2 (Không bắt buộc - Cho Đội Đôi):</label>
+                            <input type="text" id="team_mentor2" placeholder="Nhập họ tên Mentor 2 (nếu có)...">
+                        </div>
+                        <button type="submit" class="btn-small">Tạo Đội Mentor</button>
+                    </form>
+                </div>
+
+                <!-- FORM THÊM THÍ SINH -->
+                <div class="section-card">
+                    <h3>➕ Thêm Thí Sinh Vào Đội</h3>
+                    <form id="add-candidate-form">
+                        <div class="form-group">
+                            <label for="cand_name">Họ và tên thí sinh:</label>
+                            <input type="text" id="cand_name" required placeholder="Họ tên thí sinh...">
+                        </div>
+                        <div class="form-group">
+                            <label for="cand_sbd">Số báo danh (SBD):</label>
+                            <input type="text" id="cand_sbd" placeholder="Ví dụ: 01, 02...">
+                        </div>
+                        <div class="form-group">
+                            <label for="cand_team">Chọn Đội Mentor Phụ Trách:</label>
+                            <select id="cand_team" required>
+                                <!-- JS populated -->
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-small">Thêm Thí Sinh</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <h3>📋 Danh Sách Thí Sinh Theo Đội Mentor</h3>
+                <div id="mentor-candidates-list">
+                    <!-- JS populated -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: BẢNG ĐIỂM TỔNG HỢP -->
+        <div id="tab-scores" class="tab-content" style="display: none;">
+            <div class="section-card">
+                <h3>🎮 Nhập / Cập Nhật Điểm Thi Kahoot</h3>
+                <form id="update-kahoot-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="kahoot_candidate">Chọn thí sinh:</label>
+                            <select id="kahoot_candidate" required>
+                                <!-- JS populated -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="kahoot_score">Điểm Kahoot (0.0 - 10.0):</label>
+                            <input type="number" id="kahoot_score" min="0" max="10" step="0.1" placeholder="Ví dụ: 8.5" required>
+                        </div>
+                        <button type="submit" class="btn-inline btn-small">Lưu Điểm Kahoot</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="section-card">
+                <h3>📊 Kết Quả Chấm Điểm & Xếp Hạng</h3>
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 70px; text-align: center;">Hạng</th>
+                                <th>Thí sinh</th>
+                                <th>Đội Mentor</th>
+                                <th>Điểm BGK (Áo dài | Truyền cảm hứng)</th>
+                                <th style="width: 120px; text-align: center;">Điểm Kahoot</th>
+                                <th style="width: 100px; text-align: center;">Điểm TB</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scores-table-body">
+                            <!-- JS populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let appData = { users: [], teams: [], candidates: [], scores: [] };
+
+        // Chuyển đổi qua lại giữa các tab
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.getElementById(tabId).style.display = 'block';
+            
+            document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            loadData();
+        }
+
+        // Hiện thông báo toast
+        function showAlert(message, type = 'success') {
+            const container = document.getElementById('alert-container');
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 4000);
+        }
+
+        // Tải toàn bộ dữ liệu từ server
+        async function loadData() {
+            try {
+                const res = await fetch('/api/data');
+                if (!res.ok) throw new Error('Không thể tải dữ liệu');
+                appData = await res.json();
+                
+                renderUsers();
+                renderCandidates();
+                renderScores();
+                populateKahootCandidates();
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ: ' + err.message, 'error');
+            }
+        }
+
+        // Render Tab 1: Tài khoản
+        function renderUsers() {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+            
+            const sortedUsers = [...appData.users].sort((a, b) => {
+                const rolesOrder = { admin: 1, judge: 2, user: 3 };
+                return (rolesOrder[a.role] || 9) - (rolesOrder[b.role] || 9);
+            });
+
+            sortedUsers.forEach(user => {
+                const tr = document.createElement('tr');
+                
+                let badgeClass = 'badge-user';
+                let roleName = 'User';
+                if (user.role === 'admin') { badgeClass = 'badge-admin'; roleName = 'Admin'; }
+                else if (user.role === 'judge') { badgeClass = 'badge-judge'; roleName = 'Judge (BGK)'; }
+
+                const isSelf = user.username === 'admin';
+
+                tr.innerHTML = `
+                    <td><strong>${user.username}</strong></td>
+                    <td><span class="badge ${badgeClass}">${roleName}</span></td>
+                    <td style="text-align: center;">
+                        ${isSelf ? '<span style="color: var(--text-muted); font-size: 0.85rem;">Mặc định</span>' : 
+                        `<button class="btn-small btn-danger" onclick="deleteUser('${user.username}')">Xóa</button>`}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Cập nhật dropdown chọn Đội ở Form thêm thí sinh
+            const teamSelect = document.getElementById('cand_team');
+            teamSelect.innerHTML = '<option value="">-- Chọn Đội Mentor --</option>';
+            (appData.teams || []).forEach(team => {
+                const opt = document.createElement('option');
+                opt.value = team.id;
+                opt.textContent = `${team.name} (${team.mentors.join(' & ')})`;
+                teamSelect.appendChild(opt);
+            });
+        }
+
+        // Render Tab 2: Quản lý Đội & Thí sinh
+        function renderCandidates() {
+            const container = document.getElementById('mentor-candidates-list');
+            container.innerHTML = '';
+            
+            const teams = appData.teams || [];
+            
+            if (teams.length === 0) {
+                container.innerHTML = '<p style="text-align: center; font-style: italic;">Chưa có Đội Mentor nào trong hệ thống. Hãy tạo Đội Mentor trước.</p>';
+                return;
+            }
+
+            teams.forEach(team => {
+                const block = document.createElement('div');
+                block.className = 'mentor-block';
+                
+                const teamCandidates = appData.candidates.filter(c => c.teamId === team.id);
+                
+                let candidatesHTML = '';
+                if (teamCandidates.length === 0) {
+                    candidatesHTML = '<p style="font-size: 0.95rem; font-style: italic; color: var(--text-muted); padding-left: 1rem;">Chưa có thí sinh nào trong đội.</p>';
+                } else {
+                    candidatesHTML = '<ul class="action-list">';
+                    teamCandidates.forEach(cand => {
+                        candidatesHTML += `
+                            <li class="action-item">
+                                <div>
+                                    <strong>👤 ${cand.sbd ? `[SBD ${cand.sbd}] ` : ''}${cand.name}</strong> 
+                                </div>
+                                <button class="btn-small btn-danger" onclick="deleteCandidate('${cand.id}')">Xóa thí sinh</button>
+                            </li>
+                        `;
+                    });
+                    candidatesHTML += '</ul>';
+                }
+
+                block.innerHTML = `
+                    <div class="mentor-block-title">
+                        <span>👥 Đội: <strong>${team.name}</strong> <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">(${team.mentors.join(' & ')})</span></span>
+                        <div class="action-buttons" style="align-items: center;">
+                            <span class="badge badge-mentor" style="margin-right: 0.5rem;">${teamCandidates.length} thí sinh</span>
+                            <button class="btn-small btn-danger" style="margin-top:0; padding: 0.3rem 0.6rem; font-size:0.8rem;" onclick="deleteTeam('${team.id}', '${team.name}')">Xóa Đội</button>
+                        </div>
+                    </div>
+                    ${candidatesHTML}
+                `;
+                container.appendChild(block);
+            });
+        }
+
+        // Dropdown chọn thí sinh để nhập điểm Kahoot
+        function populateKahootCandidates() {
+            const select = document.getElementById('kahoot_candidate');
+            select.innerHTML = '<option value="">-- Chọn Thí Sinh --</option>';
+            
+            (appData.candidates || []).forEach(cand => {
+                const opt = document.createElement('option');
+                opt.value = cand.id;
+                opt.textContent = `${cand.name} (Kahoot hiện tại: ${cand.kahoot || 0})`;
+                select.appendChild(opt);
+            });
+        }
+
+        // Render Tab 3: Bảng điểm
+        function renderScores() {
+            const tbody = document.getElementById('scores-table-body');
+            tbody.innerHTML = '';
+
+            if (appData.candidates.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; font-style: italic;">Chưa có thí sinh nào để hiển thị bảng điểm.</td></tr>';
+                return;
+            }
+
+            const rankedCandidates = appData.candidates.map(cand => {
+                const candScores = appData.scores.filter(s => s.candidateId === cand.id);
+                
+                // Điểm trung bình Áo dài của các BGK
+                const v1Scores = candScores.filter(s => typeof s.aoDai !== 'undefined');
+                const avgAoDai = v1Scores.length > 0 ? (v1Scores.reduce((sum, s) => sum + s.aoDai, 0) / v1Scores.length) : 0;
+                
+                // Điểm trung bình Truyền cảm hứng của các BGK
+                const v2Scores = candScores.filter(s => typeof s.inspiration !== 'undefined');
+                const avgInspiration = v2Scores.length > 0 ? (v2Scores.reduce((sum, s) => sum + s.inspiration, 0) / v2Scores.length) : 0;
+                
+                // Điểm Kahoot
+                const scoreKahoot = cand.kahoot || 0;
+
+                // Điểm TB Tổng kết = (Áo Dài TB + Truyền cảm hứng TB + Kahoot) / 3
+                const avgScore = ((avgAoDai + avgInspiration + scoreKahoot) / 3).toFixed(2);
+
+                return { 
+                    ...cand, 
+                    avgAoDai,
+                    avgInspiration,
+                    avgScore: parseFloat(avgScore),
+                    scores: candScores 
+                };
+            });
+
+            // Sắp xếp
+            rankedCandidates.sort((a, b) => b.avgScore - a.avgScore);
+
+            rankedCandidates.forEach((cand, index) => {
+                const tr = document.createElement('tr');
+                
+                let rankText = index + 1;
+                let rankClass = '';
+                if (index === 0) rankClass = 'rank-1';
+                else if (index === 1) rankClass = 'rank-2';
+                else if (index === 2) rankClass = 'rank-3';
+
+                // Chi tiết điểm BGK (Áo dài & Truyền cảm hứng)
+                let scoresDetailsHTML = '';
+                if (cand.scores.length === 0) {
+                    scoresDetailsHTML = '<span style="color: var(--text-muted); font-size: 0.9rem; font-style: italic;">Chưa chấm</span>';
+                } else {
+                    scoresDetailsHTML = cand.scores.map(s => `
+                        <div style="font-size: 0.9rem; margin-bottom: 0.2rem; border-bottom: 1px dashed rgba(255,255,255,0.02); padding-bottom:0.1rem;">
+                            <span class="badge badge-judge" style="font-size: 0.75rem; padding: 0.1rem 0.4rem;">${s.judge}</span>: 
+                            Áo dài: <strong style="color:var(--accent-blue);">${s.aoDai || 0}</strong> | 
+                            Truyền cảm hứng: <strong style="color:var(--accent-blue);">${s.inspiration || 0}</strong>
+                            ${s.comment ? `<div style="color:var(--text-muted); font-style:italic; font-size:0.8rem; margin-top:0.1rem;">Nhận xét: "${s.comment}"</div>` : ''}
+                        </div>
+                    `).join('');
+                }
+
+                // Điểm trung bình hiển thị
+                const avgDisplay = `<span class="badge btn-success" style="font-size: 1rem; padding: 0.3rem 0.8rem;">${cand.avgScore.toFixed(2)}</span>`;
+
+                // Tìm Đội Mentor
+                const team = appData.teams.find(t => t.id === cand.teamId);
+                const teamDisplay = team 
+                    ? `👥 <strong>${team.name}</strong> <div style="font-size:0.75rem; color:var(--text-muted);">(${team.mentors.join(' & ')})</div>`
+                    : '<span style="color: var(--text-muted); font-style: italic;">Chưa gán đội</span>';
+
+                tr.innerHTML = `
+                    <td style="text-align: center;"><strong class="${rankClass}">${rankText}</strong></td>
+                    <td><strong>👤 ${cand.sbd ? `[SBD ${cand.sbd}] ` : ''}${cand.name}</strong></td>
+                    <td>${teamDisplay}</td>
+                    <td>${scoresDetailsHTML}</td>
+                    <td style="text-align: center;"><span class="badge badge-user" style="font-size:0.95rem; font-weight:bold; background:rgba(82, 196, 26, 0.15); border:1px solid #52c41a; color:#73d13d;">${cand.kahoot || 0}</span></td>
+                    <td style="text-align: center;">${avgDisplay}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Xử lý tạo người dùng qua AJAX
+        document.getElementById('add-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('new_username').value.trim();
+            const password = document.getElementById('new_password').value;
+            const role = document.getElementById('new_role').value;
+
+            try {
+                const res = await fetch('/admin/add-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    body: new URLSearchParams({ username, password, role })
+                });
+
+                if (res.ok) {
+                    showAlert('✅ Thêm tài khoản thành công!');
+                    document.getElementById('add-user-form').reset();
+                    loadData();
+                } else {
+                    const errData = await res.json();
+                    if (errData.error === 'exists') {
+                        showAlert('❌ Tên tài khoản đã tồn tại!', 'error');
+                    } else {
+                        showAlert('❌ Thêm tài khoản thất bại!', 'error');
+                    }
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        });
+
+        // Xử lý tạo Đội Mentor
+        document.getElementById('add-team-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('team_name').value.trim();
+            const mentor1 = document.getElementById('team_mentor1').value.trim();
+            const mentor2 = document.getElementById('team_mentor2').value.trim();
+
+            try {
+                const res = await fetch('/admin/add-team', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ name, mentor1, mentor2 })
+                });
+
+                if (res.ok) {
+                    showAlert('✅ Tạo đội Mentor thành công!');
+                    document.getElementById('add-team-form').reset();
+                    loadData();
+                } else {
+                    showAlert('❌ Tạo đội Mentor thất bại!', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        });
+
+        // Xử lý thêm thí sinh qua AJAX
+        document.getElementById('add-candidate-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('cand_name').value.trim();
+            const sbd = document.getElementById('cand_sbd').value.trim();
+            const teamId = document.getElementById('cand_team').value;
+
+            if (!teamId) {
+                showAlert('❌ Vui lòng chọn Đội Mentor phụ trách!', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/admin/add-candidate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ name, teamId, sbd })
+                });
+
+                if (res.ok) {
+                    showAlert('✅ Thêm thí sinh vào đội thành công!');
+                    document.getElementById('add-candidate-form').reset();
+                    loadData();
+                } else {
+                    showAlert('❌ Thêm thí sinh thất bại!', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        });
+
+        // Xử lý cập nhật điểm Kahoot qua AJAX
+        document.getElementById('update-kahoot-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const candidateId = document.getElementById('kahoot_candidate').value;
+            const kahoot = document.getElementById('kahoot_score').value;
+
+            if (!candidateId) {
+                showAlert('❌ Vui lòng chọn Thí sinh để cập nhật điểm Kahoot!', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/admin/update-kahoot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ candidateId, kahoot })
+                });
+
+                if (res.ok) {
+                    showAlert('✅ Đã cập nhật điểm Kahoot thành công!');
+                    document.getElementById('update-kahoot-form').reset();
+                    loadData();
+                } else {
+                    showAlert('❌ Cập nhật điểm Kahoot thất bại!', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        });
+
+        // Xóa tài khoản người dùng
+        async function deleteUser(username) {
+            if (!confirm(`Bạn có chắc chắn muốn xóa tài khoản "${username}" không?`)) return;
+            
+            try {
+                const res = await fetch('/admin/delete-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ username })
+                });
+                
+                if (res.ok) {
+                    showAlert(`✅ Đã xóa tài khoản "${username}" thành công.`);
+                    loadData();
+                } else {
+                    showAlert('❌ Xóa tài khoản thất bại.', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        }
+
+        // Xóa đội mentor
+        async function deleteTeam(teamId, teamName) {
+            if (!confirm(`Bạn có chắc chắn muốn xóa Đội "${teamName}" không? Toàn bộ thí sinh và điểm liên quan của đội này cũng sẽ bị xóa hoàn toàn.`)) return;
+            
+            try {
+                const res = await fetch('/admin/delete-team', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ teamId })
+                });
+                
+                if (res.ok) {
+                    showAlert(`✅ Đã xóa Đội "${teamName}" thành công.`);
+                    loadData();
+                } else {
+                    showAlert('❌ Xóa đội thất bại.', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        }
+
+        // Xóa thí sinh
+        async function deleteCandidate(candidateId) {
+            if (!confirm('Bạn có chắc chắn muốn xóa thí sinh này không?')) return;
+            
+            try {
+                const res = await fetch('/admin/delete-candidate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ candidateId })
+                });
+                
+                if (res.ok) {
+                    showAlert('✅ Đã xóa thí sinh thành công.');
+                    loadData();
+                } else {
+                    showAlert('❌ Xóa thí sinh thất bại.', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        }
+
+        // Xử lý và đọc file Excel nhập Đội & Thí sinh
+        let tempImportData = null;
+
+        function handleExcelImport() {
+            const fileInput = document.getElementById('excel-file-input');
+            const previewArea = document.getElementById('excel-preview-area');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showAlert('❌ Vui lòng chọn file Excel trước!', 'error');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    if (rows.length === 0) {
+                        showAlert('❌ File Excel không có dữ liệu!', 'error');
+                        return;
+                    }
+
+                    const teamsMap = {};
+                    const candidatesList = [];
+
+                    let startRowIdx = 1;
+                    const firstRow = rows[0];
+                    if (firstRow && firstRow[0] && (
+                        String(firstRow[0]).toLowerCase().includes('họ tên') || 
+                        String(firstRow[0]).toLowerCase().includes('thí sinh') ||
+                        String(firstRow[0]).toLowerCase().includes('name') ||
+                        String(firstRow[0]).toLowerCase().includes('candidate') ||
+                        firstRow[2] && String(firstRow[2]).toLowerCase().includes('team') ||
+                        firstRow[2] && String(firstRow[2]).toLowerCase().includes('đội')
+                    )) {
+                        startRowIdx = 1;
+                    } else {
+                        startRowIdx = 0;
+                    }
+
+                    for (let i = startRowIdx; i < rows.length; i++) {
+                        const row = rows[i];
+                        if (!row || row.length === 0) continue;
+
+                        const candName = row[0] ? String(row[0]).trim() : '';
+                        const sbd = row[1] ? String(row[1]).trim() : '';
+                        const teamName = row[2] ? String(row[2]).trim() : '';
+                        const mentorsStr = row[3] ? String(row[3]).trim() : '';
+
+                        if (!candName && !teamName) continue;
+
+                        let mentors = [];
+                        if (mentorsStr) {
+                            mentors = mentorsStr.split(/&|,|and/).map(m => m.trim()).filter(m => m !== '');
+                        }
+
+                        if (teamName) {
+                            if (!teamsMap[teamName]) {
+                                teamsMap[teamName] = {
+                                    name: teamName,
+                                    mentors: mentors
+                                };
+                            } else {
+                                mentors.forEach(m => {
+                                    if (!teamsMap[teamName].mentors.map(x => x.toLowerCase()).includes(m.toLowerCase())) {
+                                        teamsMap[teamName].mentors.push(m);
+                                    }
+                                });
+                            }
+                        }
+
+                        if (candName && teamName) {
+                            candidatesList.push({
+                                name: candName,
+                                sbd: sbd,
+                                teamName: teamName
+                            });
+                        }
+                    }
+
+                    const detectedTeams = Object.values(teamsMap);
+                    if (detectedTeams.length === 0 && candidatesList.length === 0) {
+                        showAlert('❌ Không tìm thấy dữ liệu Đội hoặc Thí sinh hợp lệ!', 'error');
+                        return;
+                    }
+
+                    tempImportData = {
+                        teams: detectedTeams,
+                        candidates: candidatesList
+                    };
+
+                    previewArea.style.display = 'block';
+                    previewArea.innerHTML = `
+                        <h4 style="color: var(--accent-blue); margin-bottom: 0.5rem;">🔍 Kết Quả Xem Trước (Preview):</h4>
+                        <ul style="list-style-type: none; padding-left: 0; margin-bottom: 1rem;">
+                            <li>• Phát hiện <strong>${detectedTeams.length}</strong> Đội Mentor mới/đã có.</li>
+                            <li>• Phát hiện <strong>${candidatesList.length}</strong> Thí sinh mới.</li>
+                        </ul>
+                        
+                        <div style="max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 6px; margin-bottom: 1.2rem; font-size: 0.85rem;">
+                            <table style="width:100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="border-bottom:1px solid rgba(255,255,255,0.1); text-align:left;">
+                                        <th style="padding-bottom:0.3rem; width: 60px;">SBD</th>
+                                        <th style="padding-bottom:0.3rem;">Thí sinh</th>
+                                        <th style="padding-bottom:0.3rem;">Đội Mentor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${candidatesList.map(c => `
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                                            <td style="padding:0.3rem 0; font-weight:bold; color:var(--accent-blue);">${c.sbd || '-'}</td>
+                                            <td style="padding:0.3rem 0; font-weight:bold;">${c.name}</td>
+                                            <td style="padding:0.3rem 0;">${c.teamName}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="display:flex; justify-content: flex-end; gap:0.5rem;">
+                            <button type="button" class="btn-small btn-danger" onclick="cancelExcelImport()" style="margin-top:0; width:auto;">Hủy bỏ</button>
+                            <button type="button" class="btn-small btn-success" onclick="submitExcelImport()" style="margin-top:0; width:auto;">Xác Nhận Nhập Liệu</button>
+                        </div>
+                    `;
+
+                } catch (err) {
+                    console.error(err);
+                    showAlert('❌ Lỗi khi đọc file Excel. Vui lòng kiểm tra lại cấu trúc file!', 'error');
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function cancelExcelImport() {
+            tempImportData = null;
+            document.getElementById('excel-file-input').value = '';
+            document.getElementById('excel-preview-area').style.display = 'none';
+            document.getElementById('excel-preview-area').innerHTML = '';
+        }
+
+        async function submitExcelImport() {
+            if (!tempImportData) return;
+
+            try {
+                const res = await fetch('/admin/import-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ data: JSON.stringify(tempImportData) })
+                });
+
+                if (res.ok) {
+                    showAlert('✅ Đã nhập dữ liệu Đội & Thí sinh từ Excel thành công!');
+                    cancelExcelImport();
+                    loadData();
+                } else {
+                    showAlert('❌ Nhập dữ liệu thất bại!', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        }
+
+        // Khởi động load dữ liệu lúc đầu
+        window.addEventListener('DOMContentLoaded', loadData);
+    </script>
 </body>
 </html>
