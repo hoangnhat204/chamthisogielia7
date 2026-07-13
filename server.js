@@ -467,6 +467,10 @@ app.post('/admin/import-data', requireAdmin, (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
-});
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log(`Server is running at http://localhost:${port}`);
+    });
+}
+
+module.exports = app;
