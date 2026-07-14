@@ -143,18 +143,10 @@
     ],
     "scores": [
         {
-            "judge": "admin",
+            "judge": "bgk1",
             "candidateId": "candidate_1783960000000",
             "aoDai": 8,
-            "inspiration": 8,
-            "comment": ""
-        },
-        {
-            "judge": "admin",
-            "candidateId": "candidate_1783960000001",
-            "aoDai": 9.5,
-            "inspiration": 8,
-            "comment": ""
+            "inspiration": 8
         }
     ],
     "teams": [
@@ -189,6 +181,410 @@
                 "Nguyễn An Tâm",
                 "Trần Chí Tâm"
             ]
+        }
+    ],
+    "archivedRounds": [
+        {
+            "id": "round_1784034792924",
+            "name": "test 1",
+            "scores": [
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000000",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000001",
+                    "aoDai": 9.5,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783960000000",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783960000001",
+                    "aoDai": 8.5,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783960000002",
+                    "aoDai": 6,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783960000003",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783960000004",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783960000005",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783960000006",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783960000007",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783960000008",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783960000009",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783960000010",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783960000011",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783960000012",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783963005428_b5w21",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783963005428_3eyro",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783963005428_oguuy",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783963005428_k0e92",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783963005428_whfqj",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783963005428_aflfg",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "BGK_1",
+                    "candidateId": "candidate_1783963005428_5rye2",
+                    "aoDai": 8,
+                    "inspiration": 8,
+                    "comment": ""
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000002",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000003",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000004",
+                    "aoDai": 7.5,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000005",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000006",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000007",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000008",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000009",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000010",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000011",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000012",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783963005428_b5w21",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783963005428_3eyro",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783963005428_oguuy",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783963005428_k0e92",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783963005428_whfqj",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783963005428_aflfg",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783963005428_5rye2",
+                    "aoDai": 8,
+                    "inspiration": 8
+                }
+            ],
+            "createdAt": "2026-07-14T13:13:12.924Z"
+        },
+        {
+            "id": "round_1784036518269",
+            "name": "tesst",
+            "scores": [
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000000",
+                    "aoDai": 8.5,
+                    "inspiration": 6.5
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000001",
+                    "aoDai": 8,
+                    "inspiration": 9.5
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000002",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000003",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000004",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000005",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000006",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000007",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000008",
+                    "aoDai": 7.5,
+                    "inspiration": 7.5
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000009",
+                    "aoDai": 7.5,
+                    "inspiration": 5.5
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000010",
+                    "aoDai": 8,
+                    "inspiration": 6.5
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000011",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783960000012",
+                    "aoDai": 9.5,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783963005428_b5w21",
+                    "aoDai": 6.5,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783963005428_3eyro",
+                    "aoDai": 5.5,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783963005428_oguuy",
+                    "aoDai": 10,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783963005428_k0e92",
+                    "aoDai": 5.5,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783963005428_whfqj",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783963005428_aflfg",
+                    "aoDai": 8.5,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "admin",
+                    "candidateId": "candidate_1783963005428_5rye2",
+                    "aoDai": 8,
+                    "inspiration": 8
+                },
+                {
+                    "judge": "bgk1",
+                    "candidateId": "candidate_1783960000000",
+                    "aoDai": 8,
+                    "inspiration": 8
+                }
+            ],
+            "createdAt": "2026-07-14T13:41:58.269Z"
         }
     ]
 }

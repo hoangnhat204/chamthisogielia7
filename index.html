@@ -27,27 +27,51 @@
         </div>
     </div>
 
-    <!-- PHẦN 1: BẢNG XẾP HẠNG CHUNG (HIỂN THỊ CHO TẤT CẢ) -->
+    <!-- BẢNG XẾP HẠNG -->
     <div class="glass-container">
-        <h1>🏆 Bảng Xếp Hạng Thí Sinh</h1>
-        <p>Bảng điểm tổng hợp và xếp hạng thực tế của các thí sinh Đường Lên Đỉnh Sogielia Mùa 7.</p>
+        <h1>🏆 Bảng Xếp Hạng Cuộc Thi</h1>
         
-        <div class="table-responsive">
-            <table class="custom-table">
-                <thead>
-                    <tr>
-                        <th style="width: 70px; text-align: center;">Hạng</th>
-                        <th>Thí sinh</th>
-                        <th>Đội Mentor phụ trách</th>
-                        <th style="width: 120px; text-align: center;">Điểm TB</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboard-body">
-                    <tr>
-                        <td colspan="4" style="text-align: center; font-style: italic;">Đang tải dữ liệu xếp hạng...</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="admin-tabs" style="justify-content: center; margin-bottom: 1rem;">
+            <button class="admin-tab active" onclick="switchBoardTab('aodai-container', event)">Phần Thi Áo Dài</button>
+            <button class="admin-tab" onclick="switchBoardTab('inspiration-container', event)">Phần Thi Truyền Cảm Hứng</button>
+        </div>
+
+        <div id="aodai-container" class="tab-content" style="display: flex; flex-direction: column;">
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 70px; text-align: center;">Hạng</th>
+                            <th>Thí sinh</th>
+                            <th>Đội Mentor</th>
+                            <th>Điểm từng BGK</th>
+                            <th style="width: 100px; text-align: center;">Điểm TB</th>
+                        </tr>
+                    </thead>
+                    <tbody id="aodai-board">
+                        <tr><td colspan="5" style="text-align: center; font-style: italic;">Đang tải...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="inspiration-container" class="tab-content" style="display: none; flex-direction: column;">
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 70px; text-align: center;">Hạng</th>
+                            <th>Thí sinh</th>
+                            <th>Đội Mentor</th>
+                            <th>Điểm từng BGK</th>
+                            <th style="width: 100px; text-align: center;">Điểm TB</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inspiration-board">
+                        <tr><td colspan="5" style="text-align: center; font-style: italic;">Đang tải...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -87,21 +111,40 @@
             profile.innerHTML = `👋 Xin chào, <strong>${currentUser.username}</strong> <span class="badge ${roleClass}" style="margin-left: 0.5rem;">${roleText}</span>`;
         }
 
+        function switchBoardTab(tabId, event) {
+            document.getElementById('aodai-container').style.display = 'none';
+            document.getElementById('inspiration-container').style.display = 'none';
+            document.getElementById(tabId).style.display = 'flex';
+
+            document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('active'));
+            if (event) event.currentTarget.classList.add('active');
+        }
+
         async function loadData() {
             try {
                 const res = await fetch('/api/data');
                 if (res.ok) {
                     appData = await res.json();
                     renderLeaderboard();
+                } else {
+                    document.getElementById('aodai-board').innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Lỗi tải dữ liệu</td></tr>';
+                    document.getElementById('inspiration-board').innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Lỗi tải dữ liệu</td></tr>';
                 }
             } catch (err) {
-                console.error('Lỗi khi tải dữ liệu:', err);
+                console.error(err);
+                document.getElementById('aodai-board').innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Mất kết nối với máy chủ</td></tr>';
+                document.getElementById('inspiration-board').innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Mất kết nối với máy chủ</td></tr>';
             }
         }
 
-        // 1. Render Bảng xếp hạng chung
+        // Render Bảng xếp hạng
         function renderLeaderboard() {
-            const tbody = document.getElementById('leaderboard-body');
+            renderBoard('aoDai', 'aodai-board');
+            renderBoard('inspiration', 'inspiration-board');
+        }
+
+        function renderBoard(type, tbodyId) {
+            const tbody = document.getElementById(tbodyId);
             tbody.innerHTML = '';
 
             if (appData.candidates.length === 0) {
@@ -109,29 +152,41 @@
                 return;
             }
 
-            // Tính điểm trung bình
+            // Chỉ lấy các BGK đang hoạt động
+            const judges = (appData.users || []).filter(u => u.role === 'judge' && u.status !== 'inactive');
+
             const rankedCandidates = appData.candidates.map(cand => {
                 const candScores = appData.scores.filter(s => s.candidateId === cand.id);
                 
-                // Điểm trung bình Áo dài của các BGK
-                const v1Scores = candScores.filter(s => typeof s.aoDai !== 'undefined');
-                const avgAoDai = v1Scores.length > 0 ? (v1Scores.reduce((sum, s) => sum + s.aoDai, 0) / v1Scores.length) : 0;
+                // Các điểm hợp lệ cho phần thi này
+                const validScores = candScores.filter(s => typeof s[type] !== 'undefined');
                 
-                // Điểm trung bình Truyền cảm hứng của các BGK
-                const v2Scores = candScores.filter(s => typeof s.inspiration !== 'undefined');
-                const avgInspiration = v2Scores.length > 0 ? (v2Scores.reduce((sum, s) => sum + s.inspiration, 0) / v2Scores.length) : 0;
-                
-                // Điểm Kahoot của thí sinh
-                const scoreKahoot = cand.kahoot || 0;
+                let sum = 0;
+                let count = validScores.length;
+                let judgeScoresHtml = [];
 
-                // Điểm TB Tổng kết = (avgAoDai + avgInspiration + scoreKahoot) / 3
-                const avgScore = ((avgAoDai + avgInspiration + scoreKahoot) / 3).toFixed(2);
+                judges.forEach(judge => {
+                    const js = validScores.find(s => s.judge === judge.username);
+                    if (js) {
+                        sum += js[type];
+                        judgeScoresHtml.push(`<span class="badge" style="background:#f0f0f0; color:#333; border:1px solid #ccc; font-size:0.8rem; margin:2px;">${judge.username}: <strong>${js[type]}</strong></span>`);
+                    } else {
+                        judgeScoresHtml.push(`<span class="badge" style="background:#fff; color:#aaa; border:1px dashed #eee; font-size:0.8rem; margin:2px;">${judge.username}: -</span>`);
+                    }
+                });
+
+                const avgScore = count > 0 ? (sum / count) : null;
                 
-                return { ...cand, avgScore: parseFloat(avgScore) };
+                return { 
+                    ...cand, 
+                    avgScore: avgScore,
+                    judgeScoresHtml: judgeScoresHtml.join(' ') || '<span style="color:var(--text-muted); font-size:0.85rem; font-style:italic;">Chưa có điểm</span>'
+                };
             });
 
             // Sắp xếp theo điểm trung bình giảm dần
             rankedCandidates.sort((a, b) => {
+                if (a.avgScore === null && b.avgScore === null) return 0;
                 if (a.avgScore === null) return 1;
                 if (b.avgScore === null) return -1;
                 return b.avgScore - a.avgScore;
@@ -160,6 +215,7 @@
                     <td style="text-align: center;"><strong class="${rankClass}">${rankText}</strong></td>
                     <td><strong>👤 ${cand.sbd ? `[SBD ${cand.sbd}] ` : ''}${cand.name}</strong></td>
                     <td>${teamDisplay}</td>
+                    <td style="line-height: 1.6; max-width: 300px;">${cand.judgeScoresHtml}</td>
                     <td style="text-align: center;">${avgDisplay}</td>
                 `;
                 tbody.appendChild(tr);

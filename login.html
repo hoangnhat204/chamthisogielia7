@@ -12,6 +12,8 @@
         .login-container {
             max-width: 450px;
             text-align: center;
+            flex: 0 1 auto; /* Override flex: 1 */
+            margin: auto;
         }
         .login-container h1 {
             font-size: 1.8rem;
@@ -40,8 +42,11 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const alertContainer = document.getElementById('alert-container');
-        if (urlParams.get('error')) {
+        const err = urlParams.get('error');
+        if (err === '1') {
             alertContainer.innerHTML = '<div class="alert alert-error">❌ Sai tên đăng nhập hoặc mật khẩu!</div>';
+        } else if (err === '2') {
+            alertContainer.innerHTML = '<div class="alert alert-error">❌ Tài khoản của bạn đã bị khóa!</div>';
         }
     </script>
 </body>

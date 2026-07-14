@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,15 +11,18 @@
         .admin-container {
             max-width: 1100px;
         }
+
         .form-row {
             display: flex;
             gap: 1rem;
             flex-wrap: wrap;
         }
+
         .form-row .form-group {
             flex: 1;
             min-width: 200px;
         }
+
         .btn-inline {
             align-self: flex-end;
             margin-bottom: 1.5rem;
@@ -26,25 +30,25 @@
         }
     </style>
 </head>
+
 <body>
-    <div class="header-nav">
-        <a href="/leaderboard">🏠 Về Trang Chủ</a>
+    <div class="header-nav" style="justify-content: flex-end;">
         <a href="/logout">🚪 Đăng xuất</a>
     </div>
 
     <div class="glass-container admin-container">
         <h1>⚙️ Bảng Điều Khiển Admin</h1>
         <p>Hệ thống quản lý tài khoản, đội mentor, thí sinh và bảng điểm Đường Lên Đỉnh Sogielia Mùa 7.</p>
-        
+
         <div class="admin-tabs">
             <button class="admin-tab active" onclick="switchTab('tab-users')">👥 Quản Lý Tài Khoản</button>
             <button class="admin-tab" onclick="switchTab('tab-candidates')">👥 Quản Lý Đội & Thí Sinh</button>
             <button class="admin-tab" onclick="switchTab('tab-scores')">📊 Bảng Điểm Bán Kết</button>
+            <button class="admin-tab" onclick="switchTab('tab-history')">🕰 Lịch Sử Bảng Điểm</button>
         </div>
 
         <div id="alert-container"></div>
 
-        <!-- TAB 1: QUẢN LÝ TÀI KHOẢN -->
         <div id="tab-users" class="tab-content">
             <div class="section-card">
                 <h3>➕ Tạo Tài Khoản Mới</h3>
@@ -79,39 +83,39 @@
                             <tr>
                                 <th>Tên tài khoản</th>
                                 <th>Vai trò</th>
+                                <th style="text-align: center;">Trạng thái</th>
                                 <th style="width: 100px; text-align: center;">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="users-table-body">
-                            <!-- JS populated -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- TAB 2: QUẢN LÝ ĐỘI & THÍ SINH -->
         <div id="tab-candidates" class="tab-content" style="display: none;">
-            <!-- BẢNG NHẬP LIỆU EXCEL -->
             <div class="section-card" style="margin-bottom: 1.5rem;">
                 <h3>📥 Nhập Dữ Liệu Từ File Excel</h3>
                 <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                    <input type="file" id="excel-file-input" accept=".xlsx, .xls" style="flex: 1; min-width: 250px; margin-bottom: 0; padding: 0.4rem;">
-                    <button class="btn-success" id="btn-import-excel" onclick="handleExcelImport()" style="width: auto; margin-top: 0;">Xem Trước & Nhập Dữ Liệu</button>
+                    <input type="file" id="excel-file-input" accept=".xlsx, .xls"
+                        style="flex: 1; min-width: 250px; margin-bottom: 0; padding: 0.4rem;">
+                    <button class="btn-success" id="btn-import-excel" onclick="handleExcelImport()"
+                        style="width: auto; margin-top: 0;">Xem Trước & Nhập Dữ Liệu</button>
                 </div>
-                <div id="excel-preview-area" style="margin-top: 1.5rem; display: none; background: rgba(255,255,255,0.02); padding: 1.2rem; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.15);">
-                    <!-- JavaScript populated preview -->
+                <div id="excel-preview-area"
+                    style="margin-top: 1.5rem; display: none; background: rgba(255,255,255,0.02); padding: 1.2rem; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.15);">
                 </div>
             </div>
 
             <div class="grid-2">
-                <!-- FORM TẠO ĐỘI -->
                 <div class="section-card">
                     <h3>➕ Tạo Đội Mentor Mới (Đơn/Đôi)</h3>
                     <form id="add-team-form">
                         <div class="form-group">
                             <label for="team_name">Tên đội:</label>
-                            <input type="text" id="team_name" required placeholder="Ví dụ: Đội Song Hành, Team Alpha...">
+                            <input type="text" id="team_name" required
+                                placeholder="Ví dụ: Đội Song Hành, Team Alpha...">
                         </div>
                         <div class="form-group">
                             <label for="team_mentor1">Tên Mentor 1:</label>
@@ -125,7 +129,6 @@
                     </form>
                 </div>
 
-                <!-- FORM THÊM THÍ SINH -->
                 <div class="section-card">
                     <h3>➕ Thêm Thí Sinh Vào Đội</h3>
                     <form id="add-candidate-form">
@@ -140,7 +143,6 @@
                         <div class="form-group">
                             <label for="cand_team">Chọn Đội Mentor Phụ Trách:</label>
                             <select id="cand_team" required>
-                                <!-- JS populated -->
                             </select>
                         </div>
                         <button type="submit" class="btn-small">Thêm Thí Sinh</button>
@@ -151,12 +153,10 @@
             <div class="section-card">
                 <h3>📋 Danh Sách Thí Sinh Theo Đội Mentor</h3>
                 <div id="mentor-candidates-list">
-                    <!-- JS populated -->
                 </div>
             </div>
         </div>
 
-        <!-- TAB 3: BẢNG ĐIỂM TỔNG HỢP -->
         <div id="tab-scores" class="tab-content" style="display: none;">
             <div class="section-card">
                 <h3>🎮 Nhập / Cập Nhật Điểm Thi Kahoot</h3>
@@ -165,12 +165,12 @@
                         <div class="form-group">
                             <label for="kahoot_candidate">Chọn thí sinh:</label>
                             <select id="kahoot_candidate" required>
-                                <!-- JS populated -->
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="kahoot_score">Điểm Kahoot (0.0 - 10.0):</label>
-                            <input type="number" id="kahoot_score" min="0" max="10" step="0.1" placeholder="Ví dụ: 8.5" required>
+                            <input type="number" id="kahoot_score" min="0" max="10" step="0.1" placeholder="Ví dụ: 8.5"
+                                required>
                         </div>
                         <button type="submit" class="btn-inline btn-small">Lưu Điểm Kahoot</button>
                     </div>
@@ -179,43 +179,81 @@
 
             <div class="section-card">
                 <h3>📊 Kết Quả Chấm Điểm & Xếp Hạng</h3>
-                <div class="table-responsive">
-                    <table class="custom-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 70px; text-align: center;">Hạng</th>
-                                <th>Thí sinh</th>
-                                <th>Đội Mentor</th>
-                                <th>Điểm BGK (Áo dài | Truyền cảm hứng)</th>
-                                <th style="width: 120px; text-align: center;">Điểm Kahoot</th>
-                                <th style="width: 100px; text-align: center;">Điểm TB</th>
-                            </tr>
-                        </thead>
-                        <tbody id="scores-table-body">
-                            <!-- JS populated -->
-                        </tbody>
-                    </table>
+                <div style="display:flex;gap:0.8rem;flex-wrap:wrap;margin-bottom:1rem;">
+                    <button class="btn-secondary" id="btn-toggle-admin-scores" onclick="toggleAdminScoreTable()"
+                        style="padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;">🙈 Ẩn Bảng Điểm Chi
+                        Tiết</button>
+                    <button class="btn-danger" id="btn-archive-scores" onclick="archiveScores()"
+                        style="padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;background:rgba(82, 196, 26, 0.2);border:1px solid #52c41a;color:#52c41a;">💾
+                        Lưu Bảng Hiện Tại & Tạo Bảng Mới</button>
+                </div>
+                <div id="admin-score-detail-wrapper">
+                    <!-- BẢNG XẾP HẠNG: ÁO DÀI -->
+                    <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: var(--accent-blue);">🏆 Bảng Xếp Hạng: Phần Thi Áo Dài</h4>
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px; text-align: center;">Hạng</th>
+                                    <th>Thí sinh</th>
+                                    <th>Đội Mentor</th>
+                                    <th>Chi tiết Điểm (BGK & Nhận xét)</th>
+                                    <th style="width: 100px; text-align: center;">Điểm TB</th>
+                                </tr>
+                            </thead>
+                            <tbody id="aodai-admin-board">
+                                <tr><td colspan="5" style="text-align: center; font-style: italic;">Đang tải...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- BẢNG XẾP HẠNG: TRUYỀN CẢM HỨNG -->
+                    <h4 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-blue);">🏆 Bảng Xếp Hạng: Phần Thi Truyền Cảm Hứng</h4>
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px; text-align: center;">Hạng</th>
+                                    <th>Thí sinh</th>
+                                    <th>Đội Mentor</th>
+                                    <th>Chi tiết Điểm (BGK & Nhận xét)</th>
+                                    <th style="width: 100px; text-align: center;">Điểm TB</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inspiration-admin-board">
+                                <tr><td colspan="5" style="text-align: center; font-style: italic;">Đang tải...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <div id="tab-history" class="tab-content" style="display: none;">
+            <div class="section-card">
+                <h3>🕰 Lịch Sử Các Phần Thi Đã Lưu</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Tại đây lưu trữ điểm của các phần thi (các vòng) đã hoàn thành.</p>
+                <div id="history-container">
+                    <!-- Sẽ render qua JS -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         let appData = { users: [], teams: [], candidates: [], scores: [] };
+        let tempImportData = null;
 
-        // Chuyển đổi qua lại giữa các tab
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
             document.getElementById(tabId).style.display = 'block';
-            
+
             document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            
+
             loadData();
         }
 
-        // Hiện thông báo toast
         function showAlert(message, type = 'success') {
             const container = document.getElementById('alert-container');
             container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
@@ -224,27 +262,83 @@
             }, 4000);
         }
 
-        // Tải toàn bộ dữ liệu từ server
         async function loadData() {
             try {
                 const res = await fetch('/api/data');
                 if (!res.ok) throw new Error('Không thể tải dữ liệu');
                 appData = await res.json();
-                
+
                 renderUsers();
                 renderCandidates();
                 renderScores();
                 populateKahootCandidates();
+                await loadArchivedRounds();
             } catch (err) {
-                showAlert('❌ Lỗi kết nối máy chủ: ' + err.message, 'error');
+                console.error('Lỗi tải dữ liệu:', err);
             }
         }
 
-        // Render Tab 1: Tài khoản
+        async function loadArchivedRounds() {
+            try {
+                const res = await fetch('/api/archived-rounds');
+                if (!res.ok) return;
+                const data = await res.json();
+                renderArchivedRounds(data.archives || []);
+            } catch(e) { console.error('Lỗi tải lịch sử:', e); }
+        }
+
+        function renderArchivedRounds(archives) {
+            const container = document.getElementById('history-container');
+            container.innerHTML = '';
+            if (archives.length === 0) {
+                container.innerHTML = '<p style="text-align:center; font-style:italic;">Chưa có lịch sử bảng điểm nào.</p>';
+                return;
+            }
+
+            archives.forEach(arc => {
+                const block = document.createElement('div');
+                block.className = 'mentor-block';
+                block.style.marginBottom = '1.5rem';
+
+                let scoreHTML = '<ul class="action-list">';
+                if (arc.scores && arc.scores.length > 0) {
+                    // Nhóm điểm theo thí sinh
+                    const grouped = {};
+                    arc.scores.forEach(s => {
+                        if(!grouped[s.candidateId]) grouped[s.candidateId] = [];
+                        grouped[s.candidateId].push(s);
+                    });
+
+                    for (const candId in grouped) {
+                        const cand = appData.candidates.find(c => c.id === candId) || { name: 'Thí sinh (đã xóa)' };
+                        const candScores = grouped[candId];
+                        const details = candScores.map(s => `<span class="badge badge-judge">${s.judge}</span>: Áo dài ${s.aoDai||0} | Truyền cảm hứng ${s.inspiration||0}`).join(' <br/> ');
+                        scoreHTML += `<li class="action-item" style="display:block; margin-bottom: 0.5rem;">
+                            <strong>${cand.name}</strong>
+                            <div style="font-size:0.85rem; margin-top:0.2rem;">${details}</div>
+                        </li>`;
+                    }
+                } else {
+                    scoreHTML += '<li class="action-item">Không có điểm</li>';
+                }
+                scoreHTML += '</ul>';
+
+                const createdDate = new Date(arc.created_at || arc.createdAt).toLocaleString('vi-VN');
+                block.innerHTML = `
+                    <div class="mentor-block-title">
+                        <span>💾 Vòng: <strong style="color:var(--accent-blue);">${arc.name}</strong></span>
+                        <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">${createdDate}</span>
+                    </div>
+                    ${scoreHTML}
+                `;
+                container.appendChild(block);
+            });
+        }
+
         function renderUsers() {
             const tbody = document.getElementById('users-table-body');
             tbody.innerHTML = '';
-            
+
             const sortedUsers = [...appData.users].sort((a, b) => {
                 const rolesOrder = { admin: 1, judge: 2, user: 3 };
                 return (rolesOrder[a.role] || 9) - (rolesOrder[b.role] || 9);
@@ -252,27 +346,36 @@
 
             sortedUsers.forEach(user => {
                 const tr = document.createElement('tr');
-                
+
                 let badgeClass = 'badge-user';
                 let roleName = 'User';
                 if (user.role === 'admin') { badgeClass = 'badge-admin'; roleName = 'Admin'; }
                 else if (user.role === 'judge') { badgeClass = 'badge-judge'; roleName = 'Judge (BGK)'; }
 
                 const isSelf = user.username === 'admin';
+                const isActive = user.status !== 'inactive';
+                const statusHtml = isActive 
+                    ? `<span class="badge" style="background:rgba(82,196,26,0.15); border:1px solid #52c41a; color:#52c41a;">🟢 Đang hoạt động</span>`
+                    : `<span class="badge" style="background:rgba(255,77,79,0.15); border:1px solid #ff4d4f; color:#ff4d4f;">🔴 Bị khóa</span>`;
+
+                const btnHtml = isActive 
+                    ? `<button class="btn-small btn-danger" onclick="toggleUserStatus('${user.username}')">Khóa</button>`
+                    : `<button class="btn-small btn-success" onclick="toggleUserStatus('${user.username}')">Mở Khóa</button>`;
+                const deleteBtnHtml = `<button class="btn-small btn-danger" style="margin-left:5px; background:rgba(255,77,79,0.1); border:1px solid #ff4d4f; color:#ff4d4f;" onclick="deleteUser('${user.username}')">Xóa</button>`;
 
                 tr.innerHTML = `
                     <td><strong>${user.username}</strong></td>
                     <td><span class="badge ${badgeClass}">${roleName}</span></td>
+                    <td style="text-align: center;">${statusHtml}</td>
                     <td style="text-align: center;">
-                        ${isSelf ? '<span style="color: var(--text-muted); font-size: 0.85rem;">Mặc định</span>' : 
-                        `<button class="btn-small btn-danger" onclick="deleteUser('${user.username}')">Xóa</button>`}
+                        ${isSelf ? '<span style="color: var(--text-muted); font-size: 0.85rem;">Mặc định</span>' : btnHtml + deleteBtnHtml}
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            // Cập nhật dropdown chọn Đội ở Form thêm thí sinh
             const teamSelect = document.getElementById('cand_team');
+            const currentVal = teamSelect.value;
             teamSelect.innerHTML = '<option value="">-- Chọn Đội Mentor --</option>';
             (appData.teams || []).forEach(team => {
                 const opt = document.createElement('option');
@@ -280,15 +383,15 @@
                 opt.textContent = `${team.name} (${team.mentors.join(' & ')})`;
                 teamSelect.appendChild(opt);
             });
+            if (currentVal) teamSelect.value = currentVal;
         }
 
-        // Render Tab 2: Quản lý Đội & Thí sinh
         function renderCandidates() {
             const container = document.getElementById('mentor-candidates-list');
             container.innerHTML = '';
-            
+
             const teams = appData.teams || [];
-            
+
             if (teams.length === 0) {
                 container.innerHTML = '<p style="text-align: center; font-style: italic;">Chưa có Đội Mentor nào trong hệ thống. Hãy tạo Đội Mentor trước.</p>';
                 return;
@@ -297,9 +400,9 @@
             teams.forEach(team => {
                 const block = document.createElement('div');
                 block.className = 'mentor-block';
-                
+
                 const teamCandidates = appData.candidates.filter(c => c.teamId === team.id);
-                
+
                 let candidatesHTML = '';
                 if (teamCandidates.length === 0) {
                     candidatesHTML = '<p style="font-size: 0.95rem; font-style: italic; color: var(--text-muted); padding-left: 1rem;">Chưa có thí sinh nào trong đội.</p>';
@@ -332,88 +435,123 @@
             });
         }
 
-        // Dropdown chọn thí sinh để nhập điểm Kahoot
         function populateKahootCandidates() {
             const select = document.getElementById('kahoot_candidate');
+            const currentVal = select.value;
             select.innerHTML = '<option value="">-- Chọn Thí Sinh --</option>';
-            
+
             (appData.candidates || []).forEach(cand => {
                 const opt = document.createElement('option');
                 opt.value = cand.id;
                 opt.textContent = `${cand.name} (Kahoot hiện tại: ${cand.kahoot || 0})`;
                 select.appendChild(opt);
             });
+            if (currentVal) select.value = currentVal;
         }
 
-        // Render Tab 3: Bảng điểm
+        function toggleAdminScoreTable() {
+            const w = document.getElementById('admin-score-detail-wrapper');
+            const btn = document.getElementById('btn-toggle-admin-scores');
+            if (w.style.display === 'none') {
+                w.style.display = 'block';
+                btn.textContent = '🙈 Ẩn Bảng Điểm Chi Tiết';
+            } else {
+                w.style.display = 'none';
+                btn.textContent = '👁️ Hiện Bảng Điểm Chi Tiết';
+            }
+        }
+
+        async function archiveScores() {
+            const roundName = prompt('Nhập tên phần thi (Ví dụ: Thi Áo Dài, Bán Kết 1):');
+            if (!roundName) return;
+
+            const confirmed = confirm(`⚠️ BẠN CÓ CHẮC CHẮN MUỐN LƯU BẢNG ĐIỂM THÀNH "${roundName}" VÀ BẮT ĐẦU VÒNG MỚI?\n\nĐiểm hiện tại sẽ được cất vào Lịch Sử. Bảng điểm sẽ trắng lại để BGK chấm phần tiếp theo.`);
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch('/admin/archive-round', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ roundName })
+                });
+                if (res.ok) {
+                    showAlert('✅ Đã lưu và tạo bảng điểm mới thành công!');
+                    loadData();
+                } else {
+                    showAlert('❌ Lưu bảng điểm thất bại!', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        }
+
         function renderScores() {
-            const tbody = document.getElementById('scores-table-body');
+            renderAdminBoard('aoDai', 'aodai-admin-board', 'Áo dài');
+            renderAdminBoard('inspiration', 'inspiration-admin-board', 'Truyền cảm hứng');
+        }
+
+        function renderAdminBoard(type, tbodyId, typeName) {
+            const tbody = document.getElementById(tbodyId);
             tbody.innerHTML = '';
 
             if (appData.candidates.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; font-style: italic;">Chưa có thí sinh nào để hiển thị bảng điểm.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; font-style: italic;">Chưa có thí sinh nào.</td></tr>';
                 return;
             }
 
             const rankedCandidates = appData.candidates.map(cand => {
                 const candScores = appData.scores.filter(s => s.candidateId === cand.id);
+                const validScores = candScores.filter(s => typeof s[type] !== 'undefined');
                 
-                // Điểm trung bình Áo dài của các BGK
-                const v1Scores = candScores.filter(s => typeof s.aoDai !== 'undefined');
-                const avgAoDai = v1Scores.length > 0 ? (v1Scores.reduce((sum, s) => sum + s.aoDai, 0) / v1Scores.length) : 0;
-                
-                // Điểm trung bình Truyền cảm hứng của các BGK
-                const v2Scores = candScores.filter(s => typeof s.inspiration !== 'undefined');
-                const avgInspiration = v2Scores.length > 0 ? (v2Scores.reduce((sum, s) => sum + s.inspiration, 0) / v2Scores.length) : 0;
-                
-                // Điểm Kahoot
-                const scoreKahoot = cand.kahoot || 0;
+                let sum = 0;
+                let count = validScores.length;
+                let scoresDetailsHTML = '';
 
-                // Điểm TB Tổng kết = (Áo Dài TB + Truyền cảm hứng TB + Kahoot) / 3
-                const avgScore = ((avgAoDai + avgInspiration + scoreKahoot) / 3).toFixed(2);
+                if (validScores.length === 0) {
+                    scoresDetailsHTML = '<span style="color: var(--text-muted); font-size: 0.9rem; font-style: italic;">Chưa chấm</span>';
+                } else {
+                    scoresDetailsHTML = validScores.map(s => {
+                        sum += s[type];
+                        return `
+                        <div style="font-size: 0.9rem; margin-bottom: 0.2rem; border-bottom: 1px dashed rgba(255,255,255,0.02); padding-bottom:0.1rem;">
+                            <span class="badge badge-judge" style="font-size: 0.75rem; padding: 0.1rem 0.4rem;">${s.judge}</span>: 
+                            <strong style="color:var(--accent-blue);">${s[type]}</strong>
+                            ${s.comment ? `<div style="color:var(--text-muted); font-style:italic; font-size:0.8rem; margin-top:0.1rem;">Nhận xét: "${s.comment}"</div>` : ''}
+                        </div>`;
+                    }).join('');
+                }
 
-                return { 
-                    ...cand, 
-                    avgAoDai,
-                    avgInspiration,
-                    avgScore: parseFloat(avgScore),
-                    scores: candScores 
+                const avgScore = count > 0 ? (sum / count) : null;
+
+                return {
+                    ...cand,
+                    avgScore,
+                    scoresDetailsHTML
                 };
             });
 
-            // Sắp xếp
-            rankedCandidates.sort((a, b) => b.avgScore - a.avgScore);
+            rankedCandidates.sort((a, b) => {
+                if (a.avgScore === null && b.avgScore === null) return 0;
+                if (a.avgScore === null) return 1;
+                if (b.avgScore === null) return -1;
+                return b.avgScore - a.avgScore;
+            });
 
             rankedCandidates.forEach((cand, index) => {
                 const tr = document.createElement('tr');
-                
+
                 let rankText = index + 1;
                 let rankClass = '';
                 if (index === 0) rankClass = 'rank-1';
                 else if (index === 1) rankClass = 'rank-2';
                 else if (index === 2) rankClass = 'rank-3';
 
-                // Chi tiết điểm BGK (Áo dài & Truyền cảm hứng)
-                let scoresDetailsHTML = '';
-                if (cand.scores.length === 0) {
-                    scoresDetailsHTML = '<span style="color: var(--text-muted); font-size: 0.9rem; font-style: italic;">Chưa chấm</span>';
-                } else {
-                    scoresDetailsHTML = cand.scores.map(s => `
-                        <div style="font-size: 0.9rem; margin-bottom: 0.2rem; border-bottom: 1px dashed rgba(255,255,255,0.02); padding-bottom:0.1rem;">
-                            <span class="badge badge-judge" style="font-size: 0.75rem; padding: 0.1rem 0.4rem;">${s.judge}</span>: 
-                            Áo dài: <strong style="color:var(--accent-blue);">${s.aoDai || 0}</strong> | 
-                            Truyền cảm hứng: <strong style="color:var(--accent-blue);">${s.inspiration || 0}</strong>
-                            ${s.comment ? `<div style="color:var(--text-muted); font-style:italic; font-size:0.8rem; margin-top:0.1rem;">Nhận xét: "${s.comment}"</div>` : ''}
-                        </div>
-                    `).join('');
-                }
+                const avgDisplay = cand.avgScore !== null 
+                    ? `<span class="badge btn-success" style="font-size: 1rem; padding: 0.3rem 0.8rem;">${cand.avgScore.toFixed(2)}</span>` 
+                    : '<span style="color: var(--text-muted); font-style: italic;">Chưa chấm</span>';
 
-                // Điểm trung bình hiển thị
-                const avgDisplay = `<span class="badge btn-success" style="font-size: 1rem; padding: 0.3rem 0.8rem;">${cand.avgScore.toFixed(2)}</span>`;
-
-                // Tìm Đội Mentor
                 const team = appData.teams.find(t => t.id === cand.teamId);
-                const teamDisplay = team 
+                const teamDisplay = team
                     ? `👥 <strong>${team.name}</strong> <div style="font-size:0.75rem; color:var(--text-muted);">(${team.mentors.join(' & ')})</div>`
                     : '<span style="color: var(--text-muted); font-style: italic;">Chưa gán đội</span>';
 
@@ -421,15 +559,13 @@
                     <td style="text-align: center;"><strong class="${rankClass}">${rankText}</strong></td>
                     <td><strong>👤 ${cand.sbd ? `[SBD ${cand.sbd}] ` : ''}${cand.name}</strong></td>
                     <td>${teamDisplay}</td>
-                    <td>${scoresDetailsHTML}</td>
-                    <td style="text-align: center;"><span class="badge badge-user" style="font-size:0.95rem; font-weight:bold; background:rgba(82, 196, 26, 0.15); border:1px solid #52c41a; color:#73d13d;">${cand.kahoot || 0}</span></td>
+                    <td>${cand.scoresDetailsHTML}</td>
                     <td style="text-align: center;">${avgDisplay}</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // Xử lý tạo người dùng qua AJAX
         document.getElementById('add-user-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('new_username').value.trim();
@@ -463,7 +599,6 @@
             }
         });
 
-        // Xử lý tạo Đội Mentor
         document.getElementById('add-team-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('team_name').value.trim();
@@ -489,7 +624,6 @@
             }
         });
 
-        // Xử lý thêm thí sinh qua AJAX
         document.getElementById('add-candidate-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('cand_name').value.trim();
@@ -520,7 +654,6 @@
             }
         });
 
-        // Xử lý cập nhật điểm Kahoot qua AJAX
         document.getElementById('update-kahoot-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const candidateId = document.getElementById('kahoot_candidate').value;
@@ -550,17 +683,37 @@
             }
         });
 
-        // Xóa tài khoản người dùng
+        async function toggleUserStatus(username) {
+            if (!confirm(`Bạn có chắc chắn muốn thay đổi trạng thái của tài khoản "${username}" không?`)) return;
+
+            try {
+                const res = await fetch('/admin/toggle-user-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ username })
+                });
+
+                if (res.ok) {
+                    showAlert(`✅ Đã thay đổi trạng thái tài khoản "${username}".`);
+                    loadData();
+                } else {
+                    showAlert('❌ Đổi trạng thái thất bại.', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        }
+
         async function deleteUser(username) {
-            if (!confirm(`Bạn có chắc chắn muốn xóa tài khoản "${username}" không?`)) return;
-            
+            if (!confirm(`⚠️ BẠN CÓ CHẮC CHẮN MUỐN XÓA TÀI KHOẢN "${username}" VĨNH VIỄN KHÔNG?\n\nTất cả điểm do tài khoản này chấm sẽ bị XÓA HOÀN TOÀN khỏi hệ thống!`)) return;
+
             try {
                 const res = await fetch('/admin/delete-user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({ username })
                 });
-                
+
                 if (res.ok) {
                     showAlert(`✅ Đã xóa tài khoản "${username}" thành công.`);
                     loadData();
@@ -572,17 +725,16 @@
             }
         }
 
-        // Xóa đội mentor
         async function deleteTeam(teamId, teamName) {
             if (!confirm(`Bạn có chắc chắn muốn xóa Đội "${teamName}" không? Toàn bộ thí sinh và điểm liên quan của đội này cũng sẽ bị xóa hoàn toàn.`)) return;
-            
+
             try {
                 const res = await fetch('/admin/delete-team', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({ teamId })
                 });
-                
+
                 if (res.ok) {
                     showAlert(`✅ Đã xóa Đội "${teamName}" thành công.`);
                     loadData();
@@ -594,17 +746,16 @@
             }
         }
 
-        // Xóa thí sinh
         async function deleteCandidate(candidateId) {
             if (!confirm('Bạn có chắc chắn muốn xóa thí sinh này không?')) return;
-            
+
             try {
                 const res = await fetch('/admin/delete-candidate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({ candidateId })
                 });
-                
+
                 if (res.ok) {
                     showAlert('✅ Đã xóa thí sinh thành công.');
                     loadData();
@@ -616,13 +767,10 @@
             }
         }
 
-        // Xử lý và đọc file Excel nhập Đội & Thí sinh
-        let tempImportData = null;
-
         function handleExcelImport() {
             const fileInput = document.getElementById('excel-file-input');
             const previewArea = document.getElementById('excel-preview-area');
-            
+
             if (!fileInput.files || fileInput.files.length === 0) {
                 showAlert('❌ Vui lòng chọn file Excel trước!', 'error');
                 return;
@@ -631,14 +779,14 @@
             const file = fileInput.files[0];
             const reader = new FileReader();
 
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    
+
                     const sheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[sheetName];
-                    
+
                     const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                     if (rows.length === 0) {
                         showAlert('❌ File Excel không có dữ liệu!', 'error');
@@ -651,7 +799,7 @@
                     let startRowIdx = 1;
                     const firstRow = rows[0];
                     if (firstRow && firstRow[0] && (
-                        String(firstRow[0]).toLowerCase().includes('họ tên') || 
+                        String(firstRow[0]).toLowerCase().includes('họ tên') ||
                         String(firstRow[0]).toLowerCase().includes('thí sinh') ||
                         String(firstRow[0]).toLowerCase().includes('name') ||
                         String(firstRow[0]).toLowerCase().includes('candidate') ||
@@ -787,8 +935,30 @@
             }
         }
 
-        // Khởi động load dữ liệu lúc đầu
-        window.addEventListener('DOMContentLoaded', loadData);
+        // ==========================================
+        // 🌟 CƠ CHẾ KHỞI ĐỘNG & TỰ ĐỘNG ĐỒNG BỘ (POLLING)
+        // ==========================================
+        function initAdmin() {
+            // 1. Tải dữ liệu khi mở trang
+            loadData();
+
+            // 2. Tự động làm mới dữ liệu mỗi 10 giây (chỉ chạy khi tab đang mở và không import dở dang)
+            setInterval(() => {
+                if (!document.hidden && !tempImportData) {
+                    loadData();
+                }
+            }, 10000);
+        }
+
+        window.addEventListener('DOMContentLoaded', initAdmin);
+
+        // Lập tức tải lại dữ liệu mới nhất khi Admin đổi tab quay lại
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && !tempImportData) {
+                loadData();
+            }
+        });
     </script>
 </body>
+
 </html>

@@ -21,6 +21,7 @@
   "homepage": "https://github.com/hoangnhat204/chamthisogielia7#readme",
   "dependencies": {
     "express": "^5.2.1",
-    "express-session": "^1.19.0"
+    "cookie-session": "^2.1.0",
+    "pg": "^8.11.0"
   }
 }

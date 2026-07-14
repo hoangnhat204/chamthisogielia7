@@ -12,6 +12,37 @@
     {
         "username": "BGK_1",
         "password": "1",
-        "role": "judge"
+        "role": "judge",
+        "status": "inactive"
+    },
+    {
+        "username": "bgk1",
+        "password": "19",
+        "role": "judge",
+        "status": "active"
+    },
+    {
+        "username": "bgk3",
+        "password": "19",
+        "role": "judge",
+        "status": "active"
+    },
+    {
+        "username": "bgk4",
+        "password": "19",
+        "role": "judge",
+        "status": "active"
+    },
+    {
+        "username": "bgk5",
+        "password": "19",
+        "role": "judge",
+        "status": "active"
+    },
+    {
+        "username": "bgk2",
+        "password": "19",
+        "role": "judge",
+        "status": "active"
     }
 ]

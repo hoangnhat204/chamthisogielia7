@@ -6,8 +6,9 @@
     --accent-blue: #64FFDA;
     --text-main: #E6F1FF;
     --text-muted: #8892B0;
-    --glass-bg: rgba(17, 34, 64, 0.6);
-    --glass-border: rgba(100, 255, 218, 0.2);
+    --glass-bg: rgba(10, 25, 47, 0.85); /* Darker for better contrast against LGBT bg */
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --lgbt-gradient: linear-gradient(90deg, #ff0018, #ffa52c, #ffff41, #008018, #0000f9, #86007d);
 }
 
 * {
@@ -18,17 +19,18 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    /* Animated Blue Gradient Background */
-    background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a2a6c);
+    /* Animated LGBT Gradient Background */
+    background: linear-gradient(-45deg, #ff3b3b, #ff9b3b, #f1db33, #33f15b, #336bf1, #9b33f1);
     background-size: 400% 400%;
     animation: gradientBG 15s ease infinite;
     color: var(--text-main);
     line-height: 1.6;
-    min-height: 100vh;
+    height: 100vh; /* Exactly 1 screen */
+    overflow: hidden; /* Prevent body scroll */
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 2rem;
+    padding: 1rem;
 }
 
 @keyframes gradientBG {
@@ -39,7 +41,7 @@ body {
 
 h1, h2, h3 {
     color: var(--accent-blue);
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     font-weight: 700;
 }
 
@@ -50,37 +52,41 @@ p {
 
 .glass-container {
     background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
-    padding: 2.5rem;
+    padding: 1.5rem;
     max-width: 900px;
     width: 100%;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    margin-top: 2rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex: 1; /* Takes remaining height */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .glass-container:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.7);
 }
 
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
     font-weight: 600;
     color: var(--text-main);
+    font-size: 0.9rem;
 }
 
 input, select {
     width: 100%;
-    padding: 0.8rem 1rem;
+    padding: 0.6rem 0.8rem;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--glass-border);
     border-radius: 8px;
@@ -97,41 +103,66 @@ input:focus, select:focus {
 
 button {
     background: transparent;
-    color: var(--accent-blue);
-    border: 1px solid var(--accent-blue);
-    padding: 0.8rem 2rem;
+    color: var(--text-main);
+    border: 1px solid transparent;
+    background-image: var(--lgbt-gradient);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    position: relative;
+    padding: 0.7rem 1.5rem;
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     width: 100%;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    z-index: 1;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: var(--lgbt-gradient);
+    z-index: -1;
+    border-radius: 8px;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+button:hover::before {
+    opacity: 1;
 }
 
 button:hover {
-    background: rgba(100, 255, 218, 0.1);
     transform: scale(1.02);
 }
 
 a {
-    color: var(--accent-blue);
+    color: var(--text-main);
     text-decoration: none;
     font-weight: 600;
-    transition: color 0.3s;
+    background: var(--lgbt-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: opacity 0.3s;
 }
 
 a:hover {
-    color: #fff;
-    text-shadow: 0 0 8px var(--accent-blue);
+    opacity: 0.8;
 }
 
 /* Specific styling for the story text */
 .story-content {
     text-align: justify;
+    overflow-y: auto;
+    flex: 1;
+    padding-right: 0.5rem;
 }
 .story-content p {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: var(--text-main);
     opacity: 0.9;
 }
@@ -146,50 +177,76 @@ a:hover {
     align-items: center;
     width: 100%;
     max-width: 900px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
+    flex-shrink: 0; /* Prevent shrinking */
 }
 
 hr {
     border: 0;
     height: 1px;
     background: var(--glass-border);
-    margin: 2rem 0;
+    margin: 1rem 0;
 }
 
 /* Alert messages */
 .alert {
-    padding: 1rem;
+    padding: 0.8rem;
     border-radius: 8px;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     font-weight: 600;
     text-align: center;
+    font-size: 0.9rem;
 }
 .alert-error {
-    background: rgba(255, 77, 79, 0.2);
-    border: 1px solid #ff4d4f;
-    color: #ff4d4f;
+    background: rgba(255, 77, 79, 0.8);
+    color: #fff;
 }
 .alert-success {
-    background: rgba(82, 196, 26, 0.2);
-    border: 1px solid #52c41a;
-    color: #52c41a;
+    background: rgba(82, 196, 26, 0.8);
+    color: #fff;
 }
 
 /* Dashboard Grid Layouts */
 .grid-2 {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+/* Scrollable areas inside flex containers */
+.scrollable-content, .tab-content {
+    overflow-y: auto;
+    flex: 1;
+    padding-right: 0.3rem;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-blue);
 }
 
 /* Tables styling */
 .table-responsive {
     overflow-x: auto;
+    overflow-y: auto;
     width: 100%;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
     border-radius: 8px;
     border: 1px solid var(--glass-border);
+    flex: 1; /* For tables inside flex containers */
+    max-height: 100%;
 }
 
 .custom-table {
@@ -197,6 +254,7 @@ hr {
     border-collapse: collapse;
     text-align: left;
     background: rgba(17, 34, 64, 0.3);
+    font-size: 0.9rem;
 }
 
 .custom-table th, .custom-table td {
