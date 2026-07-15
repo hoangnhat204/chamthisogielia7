@@ -185,14 +185,15 @@
                     <div class="wizard-buttons">
                         <button type="submit" class="btn-success" id="btn-submit" style="width:100%;">Gửi Điểm</button>
                     </div>
+                    <button type="button" class="btn-secondary" style="width:100%; margin-top:0.5rem;" onclick="showCompletion(false)">📋 Xem Bảng Điểm</button>
                 </form>
             </div>
         </div>
         <div id="completion-view" style="display:none;padding:1.5rem 0;">
             <div class="section-card" style="text-align:center;">
                 <span style="font-size:4rem;">🏆</span>
-                <h2 style="color:var(--accent-blue);margin-top:1rem;font-size:1.8rem;">Đã Hoàn Thành Chấm Điểm</h2>
-                <p style="margin:0.5rem 0 1rem 0;color:var(--text-muted);font-size:0.95rem;">Dưới đây là bảng điểm bán
+                <h2 id="completion-title" style="color:var(--accent-blue);margin-top:1rem;font-size:1.8rem;">Đã Hoàn Thành Chấm Điểm</h2>
+                <p id="completion-desc" style="margin:0.5rem 0 1rem 0;color:var(--text-muted);font-size:0.95rem;">Dưới đây là bảng điểm bán
                     kết bạn đã gửi lên hệ thống:</p>
 
                 <div id="score-detail-wrapper">
@@ -211,6 +212,7 @@
                 </div>
                 <p style="font-style:italic;font-size:0.85rem;color:var(--text-muted);margin-top:1rem;">⚠️ Điểm số đã
                     lưu trữ chính thức và không được chỉnh sửa.</p>
+                <button type="button" class="btn-secondary" style="margin-top:1rem; padding:0.5rem 1rem;" onclick="renderWizard()">🔙 Tiếp Tục Chấm Điểm</button>
             </div>
         </div>
         </div>
@@ -231,7 +233,7 @@
             // 🌟 THÊM CƠ CHẾ POLLING: Tự động kiểm tra dữ liệu từ Server mỗi 10 giây
             setInterval(() => {
                 if (currentUser && !document.hidden) {
-                    loadData(true);
+                    loadData(false, true); // Cập nhật dữ liệu ngầm, không làm mới giao diện
                 }
             }, 10000);
         }
@@ -259,12 +261,14 @@
             setTimeout(() => { c.innerHTML = ''; }, 3000);
         }
 
-        async function loadData(auto = false) {
+        async function loadData(auto = false, silent = false) {
             try {
                 const r = await fetch('/api/data');
                 if (r.ok) {
                     appData = await r.json();
-                    if (auto) resumeProgress(); else renderWizard();
+                    if (!silent) {
+                        if (auto) resumeProgress(); else renderWizard();
+                    }
                 }
             } catch (e) { console.error('load error', e); }
         }
@@ -307,9 +311,16 @@
             document.getElementById('step-indicator-text').textContent = `Thí sinh ${step} / ${total}`;
             document.getElementById('progress-bar-fill').style.width = `${step === 1 ? 5 : ((step - 1) / total) * 100}%`;
 
-            const myScore = appData.scores.find(s => s.candidateId === cand.id && s.judge === currentUser.username) || {};
-            selectedAoDai = typeof myScore.aoDai !== 'undefined' ? myScore.aoDai : null;
-            selectedInspiration = typeof myScore.inspiration !== 'undefined' ? myScore.inspiration : null;
+            const currentId = document.getElementById('cand-name-text').getAttribute('data-cand-id');
+            const isSameCandidate = (currentId === cand.id);
+            document.getElementById('cand-name-text').setAttribute('data-cand-id', cand.id);
+
+            // Giữ nguyên điểm đang chọn dở nếu render lại cùng 1 thí sinh (ví dụ quay lại từ bảng điểm)
+            if (!isSameCandidate) {
+                const myScore = appData.scores.find(s => s.candidateId === cand.id && s.judge === currentUser.username) || {};
+                selectedAoDai = typeof myScore.aoDai !== 'undefined' ? myScore.aoDai : null;
+                selectedInspiration = typeof myScore.inspiration !== 'undefined' ? myScore.inspiration : null;
+            }
 
             document.getElementById('score-big-aoDai').textContent = selectedAoDai !== null ? selectedAoDai.toFixed(1) + 'đ' : '--';
             document.getElementById('score-big-inspiration').textContent = selectedInspiration !== null ? selectedInspiration.toFixed(1) + 'đ' : '--';
@@ -366,8 +377,8 @@
                     body: new URLSearchParams(body)
                 });
                 if (r.ok) {
-                    await loadData(false);
-                    if (currentCandidateIndex === appData.candidates.length - 1) {
+                    await loadData(false, true);
+                    if (currentCandidateIndex >= appData.candidates.length - 1) {
                         showCompletion();
                         showAlert('🎉 Đã hoàn thành chấm điểm tất cả thí sinh!');
                     } else {
@@ -391,10 +402,19 @@
 
 
 
-        function showCompletion() {
+        function showCompletion(isFinished = true) {
             document.getElementById('wizard-view').style.display = 'none';
             const comp = document.getElementById('completion-view');
             comp.style.display = 'block';
+
+            if (!isFinished) {
+                document.getElementById('completion-title').textContent = 'Bảng Điểm Tạm Thời';
+                document.getElementById('completion-desc').textContent = 'Bạn có thể xem lại điểm đã chấm. Bấm "Tiếp Tục Chấm Điểm" để quay lại.';
+            } else {
+                document.getElementById('completion-title').textContent = 'Đã Hoàn Thành Chấm Điểm';
+                document.getElementById('completion-desc').textContent = 'Dưới đây là bảng điểm bán kết bạn đã gửi lên hệ thống:';
+            }
+
             const tbody = document.getElementById('summary-table-body');
             tbody.innerHTML = '';
             (appData.candidates || []).forEach(c => {
