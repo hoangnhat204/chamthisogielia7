@@ -494,8 +494,13 @@
             const totalScore = selectedCriteria.reduce((a, b) => a + b, 0);
             const cand = appData.candidates[currentCandidateIndex];
             const body = { candidateId: cand.id };
-            if (currentRoundPhase === 1) body.aoDai = totalScore;
-            else body.inspiration = totalScore;
+            if (currentRoundPhase === 1) {
+                body.aoDai = totalScore;
+                body.detailsR1 = JSON.stringify(selectedCriteria);
+            } else {
+                body.inspiration = totalScore;
+                body.detailsR2 = JSON.stringify(selectedCriteria);
+            }
 
             try {
                 const r = await fetch('/judge/score', {
@@ -551,10 +556,29 @@
             tbody.innerHTML = '';
             (appData.candidates || []).forEach(c => {
                 const s = appData.scores.find(v => v.candidateId === c.id && v.judge === currentUser.username) || {};
-                const ao = typeof s.aoDai !== 'undefined' ? s.aoDai.toFixed(1) + 'đ' : '-';
-                const insp = typeof s.inspiration !== 'undefined' ? s.inspiration.toFixed(1) + 'đ' : '-';
+                
+                let r1Html = '-';
+                if (typeof s.aoDai !== 'undefined') {
+                    r1Html = `<div style="font-weight:bold; color:var(--accent-blue); font-size:1.1rem;">${s.aoDai.toFixed(1)}đ</div>`;
+                    if (s.details && s.details.r1) {
+                        r1Html += `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">
+                            [${s.details.r1.map(d=>d+'đ').join(' | ')}]
+                        </div>`;
+                    }
+                }
+
+                let r2Html = '-';
+                if (typeof s.inspiration !== 'undefined') {
+                    r2Html = `<div style="font-weight:bold; color:#52c41a; font-size:1.1rem;">${s.inspiration.toFixed(1)}đ</div>`;
+                    if (s.details && s.details.r2) {
+                        r2Html += `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">
+                            [${s.details.r2.map(d=>d+'đ').join(' | ')}]
+                        </div>`;
+                    }
+                }
+
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td><strong>👤 ${c.sbd ? `[SBD ${c.sbd}] ` : ''}${c.name}</strong></td><td style="text-align:center;color:var(--accent-blue);font-weight:bold;">${ao}</td><td style="text-align:center;color:#52c41a;font-weight:bold;">${insp}</td>`;
+                tr.innerHTML = `<td><strong>👤 ${c.sbd ? `[SBD ${c.sbd}] ` : ''}${c.name}</strong></td><td style="text-align:center;">${r1Html}</td><td style="text-align:center;">${r2Html}</td>`;
                 tbody.appendChild(tr);
             });
         }

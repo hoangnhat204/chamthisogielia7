@@ -18,6 +18,10 @@ if (usePostgres) {
     pool.query('ALTER TABLE candidates ADD COLUMN IF NOT EXISTS kahoot NUMERIC(4,2) DEFAULT 0')
         .then(() => console.log('Auto-migration: kahoot column checked.'))
         .catch(err => console.error('Auto-migration error:', err.message));
+        
+    pool.query("ALTER TABLE scores ADD COLUMN IF NOT EXISTS details JSONB DEFAULT '{}'::jsonb")
+        .then(() => console.log('Auto-migration: details column checked.'))
+        .catch(err => console.error('Auto-migration details error:', err.message));
 
     pool.query(`CREATE TABLE IF NOT EXISTS archived_rounds (
         id SERIAL PRIMARY KEY,
@@ -116,6 +120,19 @@ module.exports = {
         }
     },
 
+    updateUserPassword: async (username, newPassword) => {
+        if (usePostgres) {
+            await pool.query('UPDATE users SET password = $1 WHERE username = $2', [newPassword, username]);
+        } else {
+            let users = readJSON(usersFilePath, []);
+            const user = users.find(u => u.username === username);
+            if (user) {
+                user.password = newPassword;
+                writeJSON(usersFilePath, users);
+            }
+        }
+    },
+
     getContestData: async () => {
         if (usePostgres) {
             const teams = await pool.query('SELECT * FROM teams');
@@ -210,30 +227,41 @@ module.exports = {
         }
     },
 
-    saveScore: async (judge, candidateId, aoDai, inspiration) => {
+    saveScore: async (judge, candidateId, aoDai, inspiration, detailsR1, detailsR2) => {
         if (usePostgres) {
             const existing = await pool.query('SELECT * FROM scores WHERE judge = $1 AND candidate_id = $2', [judge, candidateId]);
             if (existing.rows.length > 0) {
+                let currentDetails = existing.rows[0].details || {};
+                if (detailsR1) currentDetails.r1 = detailsR1;
+                if (detailsR2) currentDetails.r2 = detailsR2;
+                
                 if (typeof aoDai !== 'undefined') {
-                    await pool.query('UPDATE scores SET ao_dai = $1 WHERE judge = $2 AND candidate_id = $3', [aoDai, judge, candidateId]);
+                    await pool.query('UPDATE scores SET ao_dai = $1, details = $4 WHERE judge = $2 AND candidate_id = $3', [aoDai, judge, candidateId, currentDetails]);
                 } else if (typeof inspiration !== 'undefined') {
-                    await pool.query('UPDATE scores SET inspiration = $1 WHERE judge = $2 AND candidate_id = $3', [inspiration, judge, candidateId]);
+                    await pool.query('UPDATE scores SET inspiration = $1, details = $4 WHERE judge = $2 AND candidate_id = $3', [inspiration, judge, candidateId, currentDetails]);
                 }
             } else {
                 const ad = typeof aoDai !== 'undefined' ? aoDai : 0;
                 const ins = typeof inspiration !== 'undefined' ? inspiration : 0;
-                await pool.query('INSERT INTO scores (judge, candidate_id, ao_dai, inspiration) VALUES ($1, $2, $3, $4)', [judge, candidateId, ad, ins]);
+                let currentDetails = {};
+                if (detailsR1) currentDetails.r1 = detailsR1;
+                if (detailsR2) currentDetails.r2 = detailsR2;
+                await pool.query('INSERT INTO scores (judge, candidate_id, ao_dai, inspiration, details) VALUES ($1, $2, $3, $4, $5)', [judge, candidateId, ad, ins, currentDetails]);
             }
         } else {
             const contest = readJSON(contestFilePath, { teams: [], candidates: [], scores: [] });
             const existingScoreIdx = contest.scores.findIndex(s => s.candidateId === candidateId && s.judge === judge);
             let currentScore = existingScoreIdx > -1 ? contest.scores[existingScoreIdx] : {
                 judge: judge,
-                candidateId: candidateId
+                candidateId: candidateId,
+                details: {}
             };
 
+            if (!currentScore.details) currentScore.details = {};
             if (typeof aoDai !== 'undefined') currentScore.aoDai = aoDai;
             if (typeof inspiration !== 'undefined') currentScore.inspiration = inspiration;
+            if (detailsR1) currentScore.details.r1 = detailsR1;
+            if (detailsR2) currentScore.details.r2 = detailsR2;
 
             if (existingScoreIdx > -1) {
                 contest.scores[existingScoreIdx] = currentScore;

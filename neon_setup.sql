@@ -44,6 +44,7 @@ CREATE TABLE scores (
     candidate_id VARCHAR(100) REFERENCES candidates(id) ON DELETE CASCADE,
     ao_dai NUMERIC(4, 2) NULL,
     inspiration NUMERIC(4, 2) NULL,
+    details JSONB DEFAULT '{}'::jsonb,
     CONSTRAINT unique_judge_candidate UNIQUE (judge, candidate_id)
 );
 

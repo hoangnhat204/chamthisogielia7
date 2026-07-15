@@ -121,6 +121,7 @@
                         <thead>
                             <tr>
                                 <th>Tên tài khoản</th>
+                                <th>Mật khẩu</th>
                                 <th>Vai trò</th>
                                 <th style="text-align: center;">Trạng thái</th>
                                 <th style="width: 100px; text-align: center;">Thao tác</th>
@@ -400,14 +401,17 @@
                 const btnHtml = isActive 
                     ? `<button class="btn-small btn-danger" onclick="toggleUserStatus('${user.username}')">Khóa</button>`
                     : `<button class="btn-small btn-success" onclick="toggleUserStatus('${user.username}')">Mở Khóa</button>`;
+                
+                const updatePwdBtnHtml = `<button class="btn-small btn-success" style="margin-left:5px;" onclick="promptUpdatePassword('${user.username}')">Đổi MK</button>`;
                 const deleteBtnHtml = `<button class="btn-small btn-danger" style="margin-left:5px; background:rgba(255,77,79,0.1); border:1px solid #ff4d4f; color:#ff4d4f;" onclick="deleteUser('${user.username}')">Xóa</button>`;
 
                 tr.innerHTML = `
                     <td><strong>${user.username}</strong></td>
+                    <td style="font-family: monospace; color: var(--accent-blue);">${user.password || '***'}</td>
                     <td><span class="badge ${badgeClass}">${roleName}</span></td>
                     <td style="text-align: center;">${statusHtml}</td>
                     <td style="text-align: center;">
-                        ${isSelf ? '<span style="color: var(--text-muted); font-size: 0.85rem;">Mặc định</span>' : btnHtml + deleteBtnHtml}
+                        ${isSelf ? '<span style="color: var(--text-muted); font-size: 0.85rem;">Mặc định</span>' : btnHtml + updatePwdBtnHtml + deleteBtnHtml}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -551,10 +555,21 @@
                 } else {
                     scoresDetailsHTML = validScores.map(s => {
                         sum += s[type];
+                        
+                        let detailsStr = '';
+                        if (s.details) {
+                            if (type === 'aoDai' && s.details.r1) {
+                                detailsStr = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.1rem;">Chi tiết: [${s.details.r1.map(d=>d+'đ').join(' | ')}]</div>`;
+                            } else if (type === 'inspiration' && s.details.r2) {
+                                detailsStr = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.1rem;">Chi tiết: [${s.details.r2.map(d=>d+'đ').join(' | ')}]</div>`;
+                            }
+                        }
+
                         return `
                         <div style="font-size: 0.9rem; margin-bottom: 0.2rem; border-bottom: 1px dashed rgba(255,255,255,0.02); padding-bottom:0.1rem;">
                             <span class="badge badge-judge" style="font-size: 0.75rem; padding: 0.1rem 0.4rem;">${s.judge}</span>: 
                             <strong style="color:var(--accent-blue);">${s[type]}</strong>
+                            ${detailsStr}
                             ${s.comment ? `<div style="color:var(--text-muted); font-style:italic; font-size:0.8rem; margin-top:0.1rem;">Nhận xét: "${s.comment}"</div>` : ''}
                         </div>`;
                     }).join('');
@@ -997,6 +1012,28 @@
                 loadData();
             }
         });
+
+        async function promptUpdatePassword(username) {
+            const newPassword = prompt(`Nhập mật khẩu mới cho tài khoản '${username}':`);
+            if (newPassword !== null && newPassword.trim() !== '') {
+                try {
+                    const res = await fetch('/admin/update-user-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, newPassword: newPassword.trim() })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showAlert(`Đã cập nhật mật khẩu cho ${username} thành công!`, 'success');
+                        socket.emit('request_initial_data');
+                    } else {
+                        showAlert('Lỗi khi cập nhật mật khẩu.', 'error');
+                    }
+                } catch (err) {
+                    showAlert('Lỗi kết nối máy chủ.', 'error');
+                }
+            }
+        }
     </script>
 </body>
 

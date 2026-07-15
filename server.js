@@ -200,6 +200,21 @@ app.post('/admin/toggle-user-status', requireAdmin, async (req, res) => {
     }
 });
 
+// Cập nhật mật khẩu tài khoản
+app.post('/admin/update-user-password', requireAdmin, async (req, res) => {
+    const { username, newPassword } = req.body;
+    try {
+        const users = await db.getUsers();
+        if (!users.find(u => u.username === username)) {
+            return res.status(404).json({ error: 'not_found' });
+        }
+        await db.updateUserPassword(username, newPassword);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'db_error' });
+    }
+});
+
 // Xóa tài khoản
 app.post('/admin/delete-user', requireAdmin, async (req, res) => {
     const { username } = req.body;
@@ -344,7 +359,7 @@ app.post('/admin/update-kahoot', requireAdmin, async (req, res) => {
 
 // Ban giám khảo chấm điểm / cập nhật điểm thí sinh (Bán kết: Áo dài, Truyền cảm hứng)
 app.post('/judge/score', requireJudge, async (req, res) => {
-    const { candidateId, aoDai, inspiration } = req.body;
+    const { candidateId, aoDai, inspiration, detailsR1, detailsR2 } = req.body;
     if (!candidateId) {
         return res.status(400).json({ error: 'missing_candidate_id' });
     }
@@ -361,9 +376,19 @@ app.post('/judge/score', requireJudge, async (req, res) => {
         parsedInspiration = parseFloat(inspiration);
         if (isNaN(parsedInspiration) || parsedInspiration < 0 || parsedInspiration > 10) return res.status(400).json({ error: 'invalid_inspiration' });
     }
+    
+    let parsedDetailsR1 = undefined;
+    if (detailsR1) {
+        try { parsedDetailsR1 = JSON.parse(detailsR1); } catch (e) {}
+    }
+    
+    let parsedDetailsR2 = undefined;
+    if (detailsR2) {
+        try { parsedDetailsR2 = JSON.parse(detailsR2); } catch (e) {}
+    }
 
     try {
-        await db.saveScore(judgeUsername, candidateId, parsedAoDai, parsedInspiration);
+        await db.saveScore(judgeUsername, candidateId, parsedAoDai, parsedInspiration, parsedDetailsR1, parsedDetailsR2);
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'db_error' });
