@@ -44,6 +44,8 @@ const requireLogin = (req, res, next) => {
 const requireAdmin = (req, res, next) => {
     if (req.session.user && req.session.user.role === 'admin') {
         next();
+    } else if (!req.session.user) {
+        res.redirect('/login');
     } else {
         console.log('requireAdmin blocked request. user:', req.session.user);
         if (req.headers['accept'] && req.headers['accept'].includes('application/json')) {
@@ -57,6 +59,8 @@ const requireAdmin = (req, res, next) => {
 const requireJudge = (req, res, next) => {
     if (req.session.user && (req.session.user.role === 'judge' || req.session.user.role === 'admin')) {
         next();
+    } else if (!req.session.user) {
+        res.redirect('/login');
     } else {
         res.status(403).json({ error: 'unauthorized_judge' });
     }
@@ -73,7 +77,7 @@ app.get('/login', (req, res) => {
             return res.redirect('/leaderboard');
         }
     }
-    res.sendFile(path.join(__dirname, 'login.html'));
+    res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
 
 // Xử lý đăng nhập
@@ -139,17 +143,17 @@ app.get('/', (req, res) => {
 });
 
 app.get('/leaderboard', requireLogin, (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
 app.get('/admin', requireAdmin, (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin.html'));
+    res.sendFile(path.join(__dirname, 'views', 'admin.html'));
 });
 
 app.get('/judge', requireLogin, (req, res) => {
     // Chỉ cho phép truy cập nếu là giám khảo hoặc admin
     if (req.session.user.role === 'judge' || req.session.user.role === 'admin') {
-        res.sendFile(path.join(__dirname, 'judge.html'));
+        res.sendFile(path.join(__dirname, 'views', 'judge.html'));
     } else {
         res.status(403).send('Chỉ Ban giám khảo mới có quyền truy cập trang này. <a href="/leaderboard">Về trang chủ</a>');
     }

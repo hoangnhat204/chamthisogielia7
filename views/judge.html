@@ -308,11 +308,11 @@
             document.getElementById('progress-bar-fill').style.width = `${step === 1 ? 5 : ((step - 1) / total) * 100}%`;
 
             const myScore = appData.scores.find(s => s.candidateId === cand.id && s.judge === currentUser.username) || {};
-            selectedAoDai = typeof myScore.aoDai !== 'undefined' ? myScore.aoDai : 8.0;
-            selectedInspiration = typeof myScore.inspiration !== 'undefined' ? myScore.inspiration : 8.0;
+            selectedAoDai = typeof myScore.aoDai !== 'undefined' ? myScore.aoDai : null;
+            selectedInspiration = typeof myScore.inspiration !== 'undefined' ? myScore.inspiration : null;
 
-            document.getElementById('score-big-aoDai').textContent = selectedAoDai.toFixed(1) + 'đ';
-            document.getElementById('score-big-inspiration').textContent = selectedInspiration.toFixed(1) + 'đ';
+            document.getElementById('score-big-aoDai').textContent = selectedAoDai !== null ? selectedAoDai.toFixed(1) + 'đ' : '--';
+            document.getElementById('score-big-inspiration').textContent = selectedInspiration !== null ? selectedInspiration.toFixed(1) + 'đ' : '--';
 
             renderScoreButtons('score-buttons-aoDai', selectedAoDai, 'selectAoDai');
             renderScoreButtons('score-buttons-inspiration', selectedInspiration, 'selectInspiration');
@@ -325,7 +325,7 @@
             const el = document.getElementById(id);
             let html = '<div class="score-buttons-grid">';
             scoresList.forEach(v => {
-                const act = Math.abs(val - v) < 0.01;
+                const act = val !== null && Math.abs(val - v) < 0.01;
                 html += `<div class="score-btn ${act ? 'active' : ''}" onclick="${cb}(${v})">${v.toFixed(1)}đ</div>`;
             });
             html += '</div>';
@@ -353,6 +353,10 @@
 
         async function handleFormSubmit(e) {
             e.preventDefault();
+            if (selectedAoDai === null || selectedInspiration === null) {
+                showAlert('❌ Vui lòng chọn điểm cho cả 2 phần thi!', 'error');
+                return;
+            }
             const cand = appData.candidates[currentCandidateIndex];
             const body = { candidateId: cand.id, aoDai: selectedAoDai, inspiration: selectedInspiration };
             try {
