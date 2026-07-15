@@ -202,6 +202,11 @@
             "judge": "admin",
             "candidateId": "candidate_1783960000011",
             "aoDai": 8
+        },
+        {
+            "judge": "bgk1",
+            "candidateId": "candidate_1783960000009",
+            "aoDai": 5
         }
     ],
     "teams": [

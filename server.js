@@ -124,8 +124,16 @@ app.get('/api/data', requireLogin, async (req, res) => {
     try {
         const users = await db.getUsers();
         const contest = await db.getContestData();
+        const isAdmin = req.session.user && req.session.user.role === 'admin';
+        
+        res.setHeader('Cache-Control', 'no-store');
         res.json({
-            users: users.map(u => ({ username: u.username, role: u.role, status: u.status })),
+            users: users.map(u => ({ 
+                username: u.username, 
+                role: u.role, 
+                status: u.status,
+                password: isAdmin ? u.password : ''
+            })),
             teams: contest.teams || [],
             candidates: contest.candidates || [],
             scores: contest.scores || []

@@ -398,20 +398,24 @@
                     ? `<span class="badge" style="background:rgba(82,196,26,0.15); border:1px solid #52c41a; color:#52c41a;">🟢 Đang hoạt động</span>`
                     : `<span class="badge" style="background:rgba(255,77,79,0.15); border:1px solid #ff4d4f; color:#ff4d4f;">🔴 Bị khóa</span>`;
 
-                const btnHtml = isActive 
-                    ? `<button class="btn-small btn-danger" onclick="toggleUserStatus('${user.username}')">Khóa</button>`
-                    : `<button class="btn-small btn-success" onclick="toggleUserStatus('${user.username}')">Mở Khóa</button>`;
-                
-                const updatePwdBtnHtml = `<button class="btn-small btn-success" style="margin-left:5px;" onclick="promptUpdatePassword('${user.username}')">Đổi MK</button>`;
-                const deleteBtnHtml = `<button class="btn-small btn-danger" style="margin-left:5px; background:rgba(255,77,79,0.1); border:1px solid #ff4d4f; color:#ff4d4f;" onclick="deleteUser('${user.username}')">Xóa</button>`;
+                const dropdownHtml = `
+                    <select class="btn-small" style="padding: 0.3rem; border-radius: 6px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--glass-border); cursor: pointer;" onchange="handleUserAction(this, '${user.username}')">
+                        <option value="" style="color: #000;">Thao tác</option>
+                        <option value="toggle" style="color: #000;">${isActive ? 'Khóa' : 'Mở Khóa'}</option>
+                        <option value="password" style="color: #000;">Đổi MK</option>
+                        <option value="delete" style="color: #ff4d4f;">Xóa</option>
+                    </select>
+                `;
 
                 tr.innerHTML = `
                     <td><strong>${user.username}</strong></td>
-                    <td style="font-family: monospace; color: var(--accent-blue);">${user.password || '***'}</td>
+                    <td style="font-family: monospace; color: var(--accent-blue);">
+                        ${user.password || ''}
+                    </td>
                     <td><span class="badge ${badgeClass}">${roleName}</span></td>
                     <td style="text-align: center;">${statusHtml}</td>
                     <td style="text-align: center;">
-                        ${isSelf ? '<span style="color: var(--text-muted); font-size: 0.85rem;">Mặc định</span>' : btnHtml + updatePwdBtnHtml + deleteBtnHtml}
+                        ${isSelf ? '<span style="color: var(--text-muted); font-size: 0.85rem;">Mặc định</span>' : dropdownHtml}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1032,6 +1036,18 @@
                 } catch (err) {
                     showAlert('Lỗi kết nối máy chủ.', 'error');
                 }
+            }
+        }
+
+        function handleUserAction(selectElem, username) {
+            const action = selectElem.value;
+            selectElem.value = ""; // Reset sau khi chọn
+            if (action === 'toggle') {
+                toggleUserStatus(username);
+            } else if (action === 'password') {
+                promptUpdatePassword(username);
+            } else if (action === 'delete') {
+                deleteUser(username);
             }
         }
     </script>
