@@ -352,7 +352,17 @@
                     for (const candId in grouped) {
                         const cand = appData.candidates.find(c => c.id === candId) || { name: 'Thí sinh (đã xóa)' };
                         const candScores = grouped[candId];
-                        const details = candScores.map(s => `<span class="badge badge-judge">${s.judge}</span>: Áo dài ${s.aoDai||0} | Truyền cảm hứng ${s.inspiration||0}`).join(' <br/> ');
+                        const details = candScores.map(s => {
+                            let r1Text = `Áo dài ${s.aoDai||0}`;
+                            if (s.details && s.details.r1) {
+                                r1Text += ` [${s.details.r1.join(' + ')}]`;
+                            }
+                            let r2Text = `Truyền cảm hứng ${s.inspiration||0}`;
+                            if (s.details && s.details.r2) {
+                                r2Text += ` [${s.details.r2.join(' + ')}]`;
+                            }
+                            return `<span class="badge badge-judge">${s.judge}</span>: ${r1Text} | ${r2Text}`;
+                        }).join(' <br/> ');
                         scoreHTML += `<li class="action-item" style="display:block; margin-bottom: 0.5rem;">
                             <strong>${cand.name}</strong>
                             <div style="font-size:0.85rem; margin-top:0.2rem;">${details}</div>
