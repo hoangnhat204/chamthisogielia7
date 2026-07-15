@@ -28,6 +28,23 @@
             margin-bottom: 1.5rem;
             width: auto;
         }
+
+        /* Tối ưu riêng cho di động */
+        @media (max-width: 450px) {
+            body { padding: 0.5rem; }
+            .admin-container { padding: 0.5rem; margin-top: 0; }
+            .site-logo { max-width: 80px; margin-bottom: 0.2rem; }
+            h1 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+            p { font-size: 0.85rem; margin-bottom: 0.5rem; }
+            .admin-tabs { flex-wrap: wrap; gap: 0.2rem; margin-bottom: 0.5rem; }
+            .admin-tab { padding: 0.4rem; font-size: 0.8rem; flex: 1 1 45%; text-align: center; }
+            .section-card { padding: 0.8rem; margin-bottom: 0.8rem; }
+            .mentor-block { padding: 0.8rem; }
+            .form-group label { font-size: 0.85rem; }
+            input, select, button { padding: 0.5rem; font-size: 0.85rem; }
+            th, td { padding: 0.4rem; font-size: 0.8rem; }
+            .badge { padding: 0.2rem 0.4rem; font-size: 0.75rem; }
+        }
     </style>
 </head>
 

@@ -19,6 +19,17 @@
             font-size: 1.8rem;
             margin-bottom: 2rem;
         }
+
+        /* Tối ưu riêng cho di động để vừa vặn 1 trang không cần cuộn */
+        @media (max-width: 450px) {
+            body { padding: 0.5rem; }
+            .login-container { padding: 1.5rem 1rem; margin-top: 1rem; }
+            .login-container h1 { font-size: 1.4rem; margin-bottom: 1rem; }
+            .form-group label { font-size: 0.9rem; margin-bottom: 0.2rem; }
+            input[type="text"], input[type="password"] { padding: 0.5rem; font-size: 0.9rem; }
+            button[type="submit"] { padding: 0.6rem; font-size: 0.95rem; }
+            .site-logo { max-width: 80px; margin-bottom: 0.5rem; }
+        }
     </style>
 </head>
 <body>
