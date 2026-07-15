@@ -34,6 +34,7 @@ CREATE TABLE candidates (
     id VARCHAR(100) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     sbd VARCHAR(50) DEFAULT '',
+    kahoot NUMERIC(4,2) DEFAULT 0,
     team_id VARCHAR(100) REFERENCES teams(id) ON DELETE CASCADE
 );
 

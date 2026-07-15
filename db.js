@@ -13,6 +13,11 @@ if (usePostgres) {
             rejectUnauthorized: false // Bỏ qua xác thực SSL nghiêm ngặt trên Vercel để tránh lỗi kết nối Neon
         }
     });
+
+    // Tự động cập nhật Database (Auto-Migration)
+    pool.query('ALTER TABLE candidates ADD COLUMN IF NOT EXISTS kahoot NUMERIC(4,2) DEFAULT 0')
+        .then(() => console.log('Auto-migration: kahoot column checked.'))
+        .catch(err => console.error('Auto-migration error:', err.message));
 } else {
     console.log('Database Mode: LOCAL JSON');
 }
