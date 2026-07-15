@@ -95,12 +95,9 @@ input:focus, select:focus {
 }
 
 button {
-    background: transparent;
-    color: var(--text-main);
-    border: 1px solid transparent;
-    background-image: var(--lgbt-gradient);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
+    background: rgba(100, 255, 218, 0.1);
+    color: var(--accent-blue);
+    border: 1px solid var(--accent-blue);
     position: relative;
     padding: 0.7rem 1.5rem;
     border-radius: 8px;
@@ -110,26 +107,11 @@ button {
     transition: all 0.3s ease;
     width: 100%;
     margin-top: 0.5rem;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
     z-index: 1;
 }
 
-button::before {
-    content: '';
-    position: absolute;
-    top: 0; right: 0; bottom: 0; left: 0;
-    background: var(--lgbt-gradient);
-    z-index: -1;
-    border-radius: 8px;
-    opacity: 0.8;
-    transition: opacity 0.3s ease;
-}
-
-button:hover::before {
-    opacity: 1;
-}
-
 button:hover {
+    background: rgba(100, 255, 218, 0.2);
     transform: scale(1.02);
 }
 
@@ -325,12 +307,25 @@ hr {
 }
 
 .btn-success {
-    color: #52c41a;
-    border-color: #52c41a;
+    background-image: var(--lgbt-gradient);
+    background-color: transparent;
+    color: #fff;
+    border-color: transparent;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.btn-success::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: var(--lgbt-gradient);
+    z-index: -1;
+    border-radius: 8px;
+    opacity: 0.8;
 }
 
 .btn-success:hover {
-    background: rgba(82, 196, 26, 0.1);
+    transform: scale(1.02);
 }
 
 /* Card Design for List View */
