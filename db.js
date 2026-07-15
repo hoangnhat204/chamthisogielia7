@@ -256,6 +256,13 @@ module.exports = {
 
     archiveCurrentRound: async (roundName) => {
         if (usePostgres) {
+            // Đảm bảo bảng tồn tại trước khi thao tác (tránh lỗi trên Vercel do hàm migration chưa chạy xong)
+            await pool.query(`CREATE TABLE IF NOT EXISTS archived_rounds (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                data JSONB NOT NULL,
+                created_at TIMESTAMP DEFAULT NOW()
+            )`);
             const scoresData = await pool.query('SELECT * FROM scores');
             const dataToArchive = { scores: scoresData.rows };
             await pool.query('INSERT INTO archived_rounds (name, data) VALUES ($1, $2)', [roundName, JSON.stringify(dataToArchive)]);
@@ -276,6 +283,13 @@ module.exports = {
 
     getArchivedRounds: async () => {
         if (usePostgres) {
+            // Đảm bảo bảng tồn tại trước khi thao tác (tránh lỗi trên Vercel do hàm migration chưa chạy xong)
+            await pool.query(`CREATE TABLE IF NOT EXISTS archived_rounds (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                data JSONB NOT NULL,
+                created_at TIMESTAMP DEFAULT NOW()
+            )`);
             const res = await pool.query('SELECT * FROM archived_rounds ORDER BY created_at DESC');
             return res.rows.map(r => ({
                 id: r.id,
