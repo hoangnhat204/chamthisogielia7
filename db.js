@@ -18,6 +18,13 @@ if (usePostgres) {
     pool.query('ALTER TABLE candidates ADD COLUMN IF NOT EXISTS kahoot NUMERIC(4,2) DEFAULT 0')
         .then(() => console.log('Auto-migration: kahoot column checked.'))
         .catch(err => console.error('Auto-migration error:', err.message));
+
+    pool.query(`CREATE TABLE IF NOT EXISTS archived_rounds (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        data JSONB NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+    )`).catch(err => console.error('Auto-migration archived_rounds error:', err.message));
 } else {
     console.log('Database Mode: LOCAL JSON');
 }
