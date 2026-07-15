@@ -10,7 +10,7 @@ if (usePostgres) {
     pool = new Pool({
         connectionString: process.env.DATABASE_URL,
         ssl: {
-            rejectUnauthorized: true // Yêu cầu bảo mật SSL khi kết nối Neon
+            rejectUnauthorized: false // Bỏ qua xác thực SSL nghiêm ngặt trên Vercel để tránh lỗi kết nối Neon
         }
     });
 } else {
@@ -18,8 +18,22 @@ if (usePostgres) {
 }
 
 // Đường dẫn file lưu trữ cục bộ JSON
-const usersFilePath = path.join(__dirname, 'users.json');
-const contestFilePath = path.join(__dirname, 'contest.json');
+let usersFilePath = path.join(__dirname, 'users.json');
+let contestFilePath = path.join(__dirname, 'contest.json');
+
+// Sửa lỗi Read-only file system trên Vercel khi chạy bằng JSON
+if (process.env.VERCEL) {
+    const tmpUsersPath = path.join('/tmp', 'users.json');
+    const tmpContestPath = path.join('/tmp', 'contest.json');
+    if (!fs.existsSync(tmpUsersPath) && fs.existsSync(usersFilePath)) {
+        fs.copyFileSync(usersFilePath, tmpUsersPath);
+    }
+    if (!fs.existsSync(tmpContestPath) && fs.existsSync(contestFilePath)) {
+        fs.copyFileSync(contestFilePath, tmpContestPath);
+    }
+    usersFilePath = tmpUsersPath;
+    contestFilePath = tmpContestPath;
+}
 
 const readJSON = (filePath, defaultVal) => {
     if (!fs.existsSync(filePath)) {
