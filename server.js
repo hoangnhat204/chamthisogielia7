@@ -9,8 +9,8 @@ const port = process.env.PORT || 3000;
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
     name: 'session',
-    keys: [process.env.SESSION_SECRET || 'my-secret-key-123'],
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    keys: [process.env.SESSION_SECRET || 'my-secret-key-123']
+    // Đã xóa maxAge để cookie bị hủy khi tắt trình duyệt/tab
 }));
 
 // Phục vụ file styles.css tĩnh
@@ -139,6 +139,7 @@ app.get('/api/data', requireLogin, async (req, res) => {
 
 // Các route hiển thị trang giao diện
 app.get('/', (req, res) => {
+    req.session = null; // Bắt buộc đăng xuất khi truy cập vào link gốc
     res.redirect('/login');
 });
 
