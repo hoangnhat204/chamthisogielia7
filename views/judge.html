@@ -148,6 +148,27 @@
             margin-bottom: 0.5rem;
             text-align: center;
         }
+
+        /* Tối ưu riêng cho di động để vừa vặn 1 trang không cần cuộn */
+        @media (max-width: 450px) {
+            body { padding: 0.3rem; }
+            .site-logo { max-width: 60px; margin-bottom: 0; }
+            .header-nav { margin-bottom: 0.2rem; padding-bottom: 0.2rem; }
+            .glass-container { padding: 0.5rem; }
+            h1 { font-size: 1.1rem !important; }
+            .round-banner { font-size: 0.8rem; margin-bottom: 0.2rem; }
+            .wizard-card { padding: 0.5rem; margin-top: 0; }
+            .candidate-name { font-size: 1.1rem; margin-bottom: 0; }
+            .candidate-team { font-size: 0.75rem; margin-bottom: 0.2rem; }
+            .section-title { font-size: 0.8rem; margin-bottom: 0; }
+            .score-display-big { font-size: 1.2rem; margin-bottom: 0; }
+            .score-section { margin: 0.2rem 0; padding-bottom: 0.2rem; }
+            .score-buttons-grid { gap: 0.2rem; }
+            .score-btn { padding: 0.3rem 0; font-size: 0.8rem; min-width: 40px; }
+            .btn-success { padding: 0.5rem; font-size: 0.9rem; margin-top: 0.2rem; }
+            .progress-bar-container { margin-bottom: 0.2rem; }
+            .step-indicator { margin-bottom: 0; }
+        }
     </style>
 </head>
 
