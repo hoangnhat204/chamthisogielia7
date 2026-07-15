@@ -466,3 +466,14 @@ textarea:focus {
 .site-logo:hover {
     transform: scale(1.05);
 }
+
+@media (max-width: 600px) {
+    .site-logo {
+        position: relative !important;
+        top: 0 !important;
+        left: 0 !important;
+        display: block !important;
+        margin: 0 auto 0.5rem auto !important;
+        max-width: 80px !important;
+    }
+}
