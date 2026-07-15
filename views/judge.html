@@ -62,8 +62,9 @@
         .score-section {
             margin: 0.5rem 0;
             padding-bottom: 0.5rem;
-            border-bottom: 1px dashed rgba(255,255,255,0.05);
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
         }
+
         .score-section:last-child {
             border-bottom: none;
         }
@@ -77,24 +78,24 @@
 
         .score-buttons-grid {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.4rem;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            gap: 0.2rem;
+            width: 100%;
         }
 
         .score-btn {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--glass-border);
             color: var(--text-main);
-            padding: 0.4rem;
+            padding: 0.4rem 0;
             border-radius: 6px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
             text-align: center;
-            flex: 1 1 15%;
-            min-width: 45px;
+            flex: 1;
             position: relative;
             z-index: 1;
         }
@@ -112,11 +113,14 @@
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
             border-color: transparent;
         }
-        
+
         .score-btn.active::before {
             content: '';
             position: absolute;
-            top: 0; right: 0; bottom: 0; left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
             background: var(--lgbt-gradient);
             z-index: -1;
             border-radius: 6px;
@@ -164,22 +168,81 @@
 
         /* Tối ưu riêng cho di động để vừa vặn 1 trang không cần cuộn */
         @media (max-width: 450px) {
-            body { padding: 0.3rem; }
-            .header-nav { margin-bottom: 0.2rem; padding-bottom: 0.2rem; }
-            .glass-container { padding: 0.5rem; }
-            h1 { font-size: 1.1rem !important; }
-            .round-banner { font-size: 0.8rem; margin-bottom: 0.2rem; }
-            .wizard-card { padding: 0.5rem; margin-top: 0; }
-            .candidate-name { font-size: 1.1rem; margin-bottom: 0; }
-            .candidate-team { font-size: 0.75rem; margin-bottom: 0.2rem; }
-            .section-title { font-size: 0.8rem; margin-bottom: 0; }
-            .score-display-big { font-size: 1.2rem; margin-bottom: 0; }
-            .score-section { margin: 0.2rem 0; padding-bottom: 0.2rem; }
-            .score-buttons-grid { gap: 0.2rem; }
-            .score-btn { padding: 0.3rem 0; font-size: 0.8rem; min-width: 40px; }
-            .btn-success { padding: 0.5rem; font-size: 0.9rem; margin-top: 0.2rem; }
-            .progress-bar-container { margin-bottom: 0.2rem; }
-            .step-indicator { margin-bottom: 0; }
+            body {
+                padding: 0.3rem;
+            }
+
+            .header-nav {
+                margin-bottom: 0.2rem;
+                padding-bottom: 0.2rem;
+            }
+
+            .glass-container {
+                padding: 0.5rem;
+            }
+
+            h1 {
+                font-size: 1.1rem !important;
+            }
+
+            .round-banner {
+                font-size: 0.8rem;
+                margin-bottom: 0.2rem;
+            }
+
+            .wizard-card {
+                padding: 0.5rem;
+                margin-top: 0;
+            }
+
+            .candidate-name {
+                font-size: 1.1rem;
+                margin-bottom: 0;
+            }
+
+            .candidate-team {
+                font-size: 0.75rem;
+                margin-bottom: 0.2rem;
+            }
+
+            .section-title {
+                font-size: 0.8rem;
+                margin-bottom: 0;
+            }
+
+            .score-display-big {
+                font-size: 1.2rem;
+                margin-bottom: 0;
+            }
+
+            .score-section {
+                margin: 0.2rem 0;
+                padding-bottom: 0.2rem;
+            }
+
+            .score-buttons-grid {
+                gap: 0.2rem;
+            }
+
+            .score-btn {
+                padding: 0.3rem 0;
+                font-size: 0.8rem;
+                min-width: 40px;
+            }
+
+            .btn-success {
+                padding: 0.5rem;
+                font-size: 0.9rem;
+                margin-top: 0.2rem;
+            }
+
+            .progress-bar-container {
+                margin-bottom: 0.2rem;
+            }
+
+            .step-indicator {
+                margin-bottom: 0;
+            }
         }
     </style>
 </head>
@@ -191,61 +254,59 @@
         <a href="/logout">🚪 Đăng xuất</a>
     </div>
     <div class="glass-container judge-container">
-        <h1 style="font-size:1.5rem;margin-bottom:0.1rem;">Trang Ban Giám Khảo</h1>
-        <div class="round-banner">Chấm điểm Bán kết</div>
+        <h1 style="font-size:1.5rem;margin-bottom:0.1rem;">Chấm điểm Bán kết</h1>
         <div id="alert-container"></div>
         <div class="scrollable-content" style="width: 100%;">
             <div id="wizard-view">
                 <div class="step-indicator" id="step-indicator-text">Thí sinh 1/1</div>
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="progress-bar-fill"></div>
-            </div>
-            <div class="wizard-card">
-                <div class="round-badge" id="round-badge-text">Bán Kết</div>
-                <div class="candidate-name" id="cand-name-text">Nguyễn Văn A</div>
-                <div class="candidate-team" id="cand-team-text">Đội Song Hành (mentor_viet & mentor_nam)</div>
-                <form id="score-form" onsubmit="handleFormSubmit(event)">
-                    <div class="score-section">
-                        <div class="section-title">Áo Dài (Vòng 1)</div>
-                        <div class="score-display-big" id="score-big-aoDai">8.0đ</div>
-                        <div id="score-buttons-aoDai"></div>
-                    </div>
-                    <div class="score-section">
-                        <div class="section-title">Truyền Cảm Hứng (Vòng 2)</div>
-                        <div class="score-display-big" id="score-big-inspiration">8.0đ</div>
-                        <div id="score-buttons-inspiration"></div>
-                    </div>
-                    <div class="wizard-buttons">
-                        <button type="submit" class="btn-success" id="btn-submit" style="width:100%;">Gửi Điểm</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div id="completion-view" style="display:none;padding:1.5rem 0;">
-            <div class="section-card" style="text-align:center;">
-                <span style="font-size:4rem;">🏆</span>
-                <h2 id="completion-title" style="color:var(--accent-blue);margin-top:1rem;font-size:1.8rem;">Đã Hoàn Thành Chấm Điểm</h2>
-                <p id="completion-desc" style="margin:0.5rem 0 1rem 0;color:var(--text-muted);font-size:0.95rem;">Dưới đây là bảng điểm bán
-                    kết bạn đã gửi lên hệ thống:</p>
-
-                <div id="score-detail-wrapper">
-                    <div class="table-responsive" style="margin:0.5rem 0;text-align:left;">
-                        <table class="custom-table" style="font-size:0.9rem;">
-                            <thead>
-                                <tr>
-                                    <th>Thí sinh</th>
-                                    <th style="text-align:center;width:140px;">Áo Dài (Vòng 1)</th>
-                                    <th style="text-align:center;width:160px;">Truyền Cảm Hứng (Vòng 2)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="summary-table-body"></tbody>
-                        </table>
-                    </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="progress-bar-fill"></div>
                 </div>
-                <p style="font-style:italic;font-size:0.85rem;color:var(--text-muted);margin-top:1rem;">⚠️ Điểm số đã
-                    lưu trữ chính thức và không được chỉnh sửa.</p>
+                <div class="wizard-card">
+                    <div class="round-badge" id="round-badge-text">Bán Kết</div>
+                    <div class="candidate-name" id="cand-name-text">Nguyễn Văn A</div>
+                    <form id="score-form" onsubmit="handleFormSubmit(event)">
+                        <div id="criteria-container"></div>
+                        <div class="score-section"
+                            style="margin-top:1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                            <div class="section-title">TỔNG ĐIỂM</div>
+                            <div class="score-display-big" id="score-big-total">0.0đ</div>
+                        </div>
+                        <div class="wizard-buttons">
+                            <button type="submit" class="btn-success" id="btn-submit" style="width:100%;">Gửi
+                                Điểm</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
+            <div id="completion-view" style="display:none;padding:1.5rem 0;">
+                <div class="section-card" style="text-align:center;">
+                    <span style="font-size:4rem;">🏆</span>
+                    <h2 id="completion-title" style="color:var(--accent-blue);margin-top:1rem;font-size:1.8rem;">Đã Hoàn
+                        Thành Chấm Điểm</h2>
+                    <p id="completion-desc" style="margin:0.5rem 0 1rem 0;color:var(--text-muted);font-size:0.95rem;">
+                        Dưới đây là bảng điểm bán
+                        kết bạn đã gửi lên hệ thống:</p>
+
+                    <div id="score-detail-wrapper">
+                        <div class="table-responsive" style="margin:0.5rem 0;text-align:left;">
+                            <table class="custom-table" style="font-size:0.9rem;">
+                                <thead>
+                                    <tr>
+                                        <th>Thí sinh</th>
+                                        <th style="text-align:center;width:140px;">Áo Dài (Vòng 1)</th>
+                                        <th style="text-align:center;width:160px;">Truyền Cảm Hứng (Vòng 2)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="summary-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <p style="font-style:italic;font-size:0.85rem;color:var(--text-muted);margin-top:1rem;">⚠️ Điểm số
+                        đã
+                        lưu trữ chính thức và không được chỉnh sửa.</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -253,18 +314,29 @@
         let currentUser = null;
         let appData = { users: [], teams: [], candidates: [], scores: [] };
         let currentCandidateIndex = 0;
-        const scoresList = [5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10];
-        let selectedAoDai = 8.0;
-        let selectedInspiration = 8.0;
+        let currentRoundPhase = 1; // 1 = Vòng 1, 2 = Vòng 2
+        let selectedCriteria = [];
+
+        const criteriaR1 = [
+            { name: "Thần thái", max: 3.0, step: 0.5 },
+            { name: "Kỹ năng trình diễn", max: 3.0, step: 0.5 },
+            { name: "Khả năng tôn vinh vẻ đẹp của tà áo dài", max: 2.0, step: 0.5 },
+            { name: "Ấn tượng tổng thể", max: 2.0, step: 0.5 }
+        ];
+
+        const criteriaR2 = [
+            { name: "Nội dung, thông điệp", max: 2.5, step: 0.5 },
+            { name: "Câu chuyện và cảm xúc", max: 2.5, step: 0.5 },
+            { name: "Liên hệ bản thân với phong trào, hoạt động LGBTIQ+", max: 3.0, step: 0.5 },
+            { name: "Kỹ năng trình bày", max: 2.0, step: 0.5 }
+        ];
 
         async function init() {
             await fetchSessionUser();
             await loadData(true);
-
-            // 🌟 THÊM CƠ CHẾ POLLING: Tự động kiểm tra dữ liệu từ Server mỗi 10 giây
             setInterval(() => {
                 if (currentUser && !document.hidden) {
-                    loadData(false, true); // Cập nhật dữ liệu ngầm, không làm mới giao diện
+                    loadData(false, true);
                 }
             }, 10000);
         }
@@ -306,9 +378,21 @@
 
         function resumeProgress() {
             const cand = appData.candidates || [];
+            // Kiểm tra vòng 1
             for (let i = 0; i < cand.length; i++) {
                 const s = appData.scores.find(v => v.candidateId === cand[i].id && v.judge === currentUser.username);
-                if (!s || typeof s.aoDai === 'undefined' || typeof s.inspiration === 'undefined') {
+                if (!s || typeof s.aoDai === 'undefined') {
+                    currentRoundPhase = 1;
+                    currentCandidateIndex = i;
+                    renderWizard();
+                    return;
+                }
+            }
+            // Kiểm tra vòng 2
+            for (let i = 0; i < cand.length; i++) {
+                const s = appData.scores.find(v => v.candidateId === cand[i].id && v.judge === currentUser.username);
+                if (!s || typeof s.inspiration === 'undefined') {
+                    currentRoundPhase = 2;
                     currentCandidateIndex = i;
                     renderWizard();
                     return;
@@ -330,77 +414,89 @@
             if (currentCandidateIndex >= candidates.length) currentCandidateIndex = candidates.length - 1;
 
             const cand = candidates[currentCandidateIndex];
-            const team = appData.teams.find(t => t.id === cand.teamId);
-            const teamName = team ? `${team.name} (${team.mentors.join(' & ')})` : 'Chưa gán';
-
             document.getElementById('cand-name-text').textContent = (cand.sbd ? `[SBD ${cand.sbd}] ` : '') + cand.name;
-            document.getElementById('cand-team-text').textContent = `Đội: ${teamName}`;
 
             const total = candidates.length;
             const step = currentCandidateIndex + 1;
 
-            document.getElementById('step-indicator-text').textContent = `Thí sinh ${step} / ${total}`;
+            document.getElementById('step-indicator-text').textContent = `Thí sinh ${step} / ${total} - Vòng ${currentRoundPhase}`;
             document.getElementById('progress-bar-fill').style.width = `${step === 1 ? 5 : ((step - 1) / total) * 100}%`;
 
-            const currentId = document.getElementById('cand-name-text').getAttribute('data-cand-id');
-            const isSameCandidate = (currentId === cand.id);
-            document.getElementById('cand-name-text').setAttribute('data-cand-id', cand.id);
+            const activeCriteria = currentRoundPhase === 1 ? criteriaR1 : criteriaR2;
+            document.getElementById('round-badge-text').textContent = currentRoundPhase === 1 ? "Vòng 1: Áo Dài" : "Vòng 2: Truyền Cảm Hứng";
 
-            // Giữ nguyên điểm đang chọn dở nếu render lại cùng 1 thí sinh (ví dụ quay lại từ bảng điểm)
-            if (!isSameCandidate) {
-                const myScore = appData.scores.find(s => s.candidateId === cand.id && s.judge === currentUser.username) || {};
-                selectedAoDai = typeof myScore.aoDai !== 'undefined' ? myScore.aoDai : null;
-                selectedInspiration = typeof myScore.inspiration !== 'undefined' ? myScore.inspiration : null;
-            }
-
-            document.getElementById('score-big-aoDai').textContent = selectedAoDai !== null ? selectedAoDai.toFixed(1) + 'đ' : '--';
-            document.getElementById('score-big-inspiration').textContent = selectedInspiration !== null ? selectedInspiration.toFixed(1) + 'đ' : '--';
-
-            renderScoreButtons('score-buttons-aoDai', selectedAoDai, 'selectAoDai');
-            renderScoreButtons('score-buttons-inspiration', selectedInspiration, 'selectInspiration');
+            selectedCriteria = activeCriteria.map(() => null);
+            renderCriteria(activeCriteria);
+            updateTotalScore();
 
             w.style.display = 'block';
             c.style.display = 'none';
         }
 
-        function renderScoreButtons(id, val, cb) {
-            const el = document.getElementById(id);
-            let html = '<div class="score-buttons-grid">';
-            scoresList.forEach(v => {
-                const act = val !== null && Math.abs(val - v) < 0.01;
-                html += `<div class="score-btn ${act ? 'active' : ''}" onclick="${cb}(${v})">${v.toFixed(1)}đ</div>`;
+        function renderCriteria(criteriaList) {
+            const container = document.getElementById('criteria-container');
+            let html = '';
+            criteriaList.forEach((crit, index) => {
+                html += `<div class="score-section">
+                    <div class="section-title" style="text-align:left; font-size: 0.95rem; margin-bottom: 0.5rem;">${index + 1}. ${crit.name}</div>
+                    <div class="score-buttons-grid" id="crit-btns-${index}">`;
+
+                let val = 0;
+                while (val <= crit.max) {
+                    html += `<div class="score-btn" onclick="selectCriterion(${index}, ${val})">${val.toFixed(1)}</div>`;
+                    val += crit.step;
+                }
+                html += `</div></div>`;
             });
-            html += '</div>';
-            el.innerHTML = html;
+            container.innerHTML = html;
         }
 
-        function selectAoDai(v) {
-            selectedAoDai = v;
-            updateActive('score-buttons-aoDai', v);
-            document.getElementById('score-big-aoDai').textContent = v.toFixed(1) + 'đ';
-        }
-
-        function selectInspiration(v) {
-            selectedInspiration = v;
-            updateActive('score-buttons-inspiration', v);
-            document.getElementById('score-big-inspiration').textContent = v.toFixed(1) + 'đ';
-        }
-
-        function updateActive(container, val) {
-            document.querySelectorAll(`#${container} .score-btn`).forEach(b => {
+        function selectCriterion(index, val) {
+            selectedCriteria[index] = val;
+            const btns = document.querySelectorAll(`#crit-btns-${index} .score-btn`);
+            btns.forEach(b => {
                 if (parseFloat(b.textContent) === val) b.classList.add('active');
                 else b.classList.remove('active');
             });
+            updateTotalScore();
+        }
+
+        function updateTotalScore() {
+            let total = 0;
+            let allSelected = true;
+            selectedCriteria.forEach(v => {
+                if (v === null) allSelected = false;
+                else total += v;
+            });
+            document.getElementById('score-big-total').textContent = total.toFixed(1) + 'đ';
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = !allSelected;
+            if (!allSelected) {
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            } else {
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            }
         }
 
         async function handleFormSubmit(e) {
             e.preventDefault();
-            if (selectedAoDai === null || selectedInspiration === null) {
-                showAlert('❌ Vui lòng chọn điểm cho cả 2 phần thi!', 'error');
+            if (selectedCriteria.includes(null)) {
+                showAlert('❌ Vui lòng chấm đủ tất cả các tiêu chí!', 'error');
                 return;
             }
+
+            if (!confirm('Ban Giám Khảo chắc chắn gửi điểm này?')) {
+                return;
+            }
+
+            const totalScore = selectedCriteria.reduce((a, b) => a + b, 0);
             const cand = appData.candidates[currentCandidateIndex];
-            const body = { candidateId: cand.id, aoDai: selectedAoDai, inspiration: selectedInspiration };
+            const body = { candidateId: cand.id };
+            if (currentRoundPhase === 1) body.aoDai = totalScore;
+            else body.inspiration = totalScore;
+
             try {
                 const r = await fetch('/judge/score', {
                     method: 'POST',
@@ -409,17 +505,24 @@
                 });
                 if (r.ok) {
                     await loadData(false, true);
-                    if (currentCandidateIndex >= appData.candidates.length - 1) {
-                        showCompletion();
-                        showAlert('🎉 Đã hoàn thành chấm điểm tất cả thí sinh!');
+                    currentCandidateIndex++;
+                    if (currentCandidateIndex >= appData.candidates.length) {
+                        if (currentRoundPhase === 1) {
+                            currentRoundPhase = 2;
+                            currentCandidateIndex = 0;
+                            showAlert('🎉 Đã chấm xong Vòng 1. Chuyển sang Vòng 2!');
+                            renderWizard();
+                        } else {
+                            showCompletion();
+                            showAlert('🎉 Đã hoàn thành chấm điểm tất cả thí sinh!');
+                        }
                     } else {
-                        currentCandidateIndex++;
                         showAlert('✅ Đã lưu điểm.');
                         renderWizard();
                     }
                 } else {
                     if (r.status === 401 || r.status === 403) {
-                        showAlert('❌ Phiên đã hết hạn, chuyển tới đăng nhập...', 'error');
+                        showAlert('❌ Phiên đã hết hạn...', 'error');
                         setTimeout(() => { window.location.href = '/login'; }, 1500);
                         return;
                     }
@@ -430,8 +533,6 @@
                 showAlert('❌ Lỗi kết nối máy chủ!', 'error');
             }
         }
-
-
 
         function showCompletion(isFinished = true) {
             document.getElementById('wizard-view').style.display = 'none';

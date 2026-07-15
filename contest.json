@@ -147,6 +147,61 @@
             "candidateId": "candidate_1783960000000",
             "aoDai": 8,
             "inspiration": 8
+        },
+        {
+            "judge": "bgk1",
+            "candidateId": "candidate_1783960000001",
+            "aoDai": 6
+        },
+        {
+            "judge": "bgk1",
+            "candidateId": "candidate_1783960000002",
+            "aoDai": 8
+        },
+        {
+            "judge": "bgk1",
+            "candidateId": "candidate_1783960000003",
+            "aoDai": 8
+        },
+        {
+            "judge": "bgk1",
+            "candidateId": "candidate_1783960000004",
+            "aoDai": 6
+        },
+        {
+            "judge": "bgk1",
+            "candidateId": "candidate_1783960000005",
+            "aoDai": 10
+        },
+        {
+            "judge": "bgk1",
+            "candidateId": "candidate_1783960000006",
+            "aoDai": 7
+        },
+        {
+            "judge": "bgk1",
+            "candidateId": "candidate_1783960000007",
+            "aoDai": 8.5
+        },
+        {
+            "judge": "bgk1",
+            "candidateId": "candidate_1783960000008",
+            "aoDai": 8
+        },
+        {
+            "judge": "admin",
+            "candidateId": "candidate_1783960000009",
+            "aoDai": 7
+        },
+        {
+            "judge": "admin",
+            "candidateId": "candidate_1783960000010",
+            "aoDai": 10
+        },
+        {
+            "judge": "admin",
+            "candidateId": "candidate_1783960000011",
+            "aoDai": 8
         }
     ],
     "teams": [

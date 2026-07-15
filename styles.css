@@ -324,21 +324,10 @@ hr {
 }
 
 .btn-success {
-    background-image: var(--lgbt-gradient);
-    background-color: transparent;
-    color: #fff;
-    border-color: transparent;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-}
-
-.btn-success::before {
-    content: '';
-    position: absolute;
-    top: 0; right: 0; bottom: 0; left: 0;
-    background: var(--lgbt-gradient);
-    z-index: -1;
-    border-radius: 8px;
-    opacity: 0.8;
+    background: rgba(100, 255, 218, 0.2);
+    color: var(--accent-blue);
+    border: 1px solid var(--accent-blue);
+    font-weight: bold;
 }
 
 .btn-success:hover {
@@ -455,6 +444,8 @@ textarea:focus {
     border-radius: 6px;
     white-space: nowrap;
     transition: all 0.2s ease;
+    position: relative;
+    z-index: 1;
 }
 
 .admin-tab.active {

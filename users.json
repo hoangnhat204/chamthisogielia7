@@ -5,17 +5,6 @@
         "role": "admin"
     },
     {
-        "username": "user",
-        "password": "1",
-        "role": "user"
-    },
-    {
-        "username": "BGK_1",
-        "password": "1",
-        "role": "judge",
-        "status": "inactive"
-    },
-    {
         "username": "bgk1",
         "password": "19",
         "role": "judge",
