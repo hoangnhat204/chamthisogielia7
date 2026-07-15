@@ -277,7 +277,17 @@ module.exports = {
     getArchivedRounds: async () => {
         if (usePostgres) {
             const res = await pool.query('SELECT * FROM archived_rounds ORDER BY created_at DESC');
-            return res.rows;
+            return res.rows.map(r => ({
+                id: r.id,
+                name: r.name,
+                scores: r.data.scores.map(s => ({
+                    judge: s.judge,
+                    candidateId: s.candidate_id,
+                    aoDai: s.ao_dai ? parseFloat(s.ao_dai) : undefined,
+                    inspiration: s.inspiration ? parseFloat(s.inspiration) : undefined
+                })),
+                createdAt: r.created_at
+            }));
         } else {
             const contest = readJSON(contestFilePath, { teams: [], candidates: [], scores: [], archivedRounds: [] });
             return contest.archivedRounds || [];
