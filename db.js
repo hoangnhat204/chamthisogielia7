@@ -6,11 +6,11 @@ const usePostgres = !!process.env.DATABASE_URL;
 let pool = null;
 
 if (usePostgres) {
-    console.log('Database Mode: SUPABASE (POSTGRESQL)');
+    console.log('Database Mode: NEON (POSTGRESQL)');
     pool = new Pool({
         connectionString: process.env.DATABASE_URL,
         ssl: {
-            rejectUnauthorized: false // Yêu cầu bảo mật SSL khi kết nối Supabase
+            rejectUnauthorized: true // Yêu cầu bảo mật SSL khi kết nối Neon
         }
     });
 } else {

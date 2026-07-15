@@ -1,14 +1,15 @@
+require('dotenv').config();
 const express = require('express');
 const session = require('cookie-session');
 const fs = require('fs');
 const path = require('path');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
     name: 'session',
-    keys: ['my-secret-key-123'],
+    keys: [process.env.SESSION_SECRET || 'my-secret-key-123'],
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
@@ -16,6 +17,9 @@ app.use(session({
 app.get('/styles.css', (req, res) => {
     res.sendFile(path.join(__dirname, 'styles.css'));
 });
+
+// Phục vụ thư mục accset tĩnh
+app.use('/accset', express.static(path.join(__dirname, 'accset')));
 
 // Chuyển hướng truy cập .html trực tiếp về các route sạch tương ứng
 app.use((req, res, next) => {

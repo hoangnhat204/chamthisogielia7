@@ -19,10 +19,9 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    /* Animated LGBT Gradient Background */
-    background: linear-gradient(-45deg, #ff3b3b, #ff9b3b, #f1db33, #33f15b, #336bf1, #9b33f1);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
+    /* Background Image */
+    background: url('/accset/nen%20sogielia%207.png') no-repeat center center fixed;
+    background-size: cover;
     color: var(--text-main);
     line-height: 1.6;
     height: 100vh; /* Exactly 1 screen */
@@ -31,12 +30,6 @@ body {
     flex-direction: column;
     align-items: center;
     padding: 1rem;
-}
-
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
 }
 
 h1, h2, h3 {
@@ -458,3 +451,18 @@ textarea:focus {
     border-color: var(--glass-border);
 }
 
+.site-logo {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    height: 60px; /* adjust height as needed */
+    width: auto;
+    z-index: 9999;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.site-logo:hover {
+    transform: scale(1.05);
+}
