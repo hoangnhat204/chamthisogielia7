@@ -385,6 +385,7 @@ app.post('/judge/score', requireJudge, async (req, res) => {
         if (isNaN(parsedInspiration) || parsedInspiration < 0 || parsedInspiration > 10) return res.status(400).json({ error: 'invalid_inspiration' });
     }
     
+    console.log("POST /judge/score Received:", req.body);
     let parsedDetailsR1 = undefined;
     if (detailsR1) {
         try { parsedDetailsR1 = JSON.parse(detailsR1); } catch (e) {}

@@ -34,17 +34,22 @@
             position: relative;
             z-index: 1;
         }
+
         .admin-tab.active {
             background-image: var(--lgbt-gradient);
             background-color: transparent;
             color: #fff;
             border-color: transparent;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
+
         .admin-tab.active::before {
             content: '';
             position: absolute;
-            top: 0; right: 0; bottom: 0; left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
             background: var(--lgbt-gradient);
             z-index: -1;
             border-radius: 8px;
@@ -53,18 +58,68 @@
 
         /* Tối ưu riêng cho di động */
         @media (max-width: 450px) {
-            body { padding: 0.5rem; }
-            .admin-container { padding: 0.5rem; margin-top: 0; }
-            h1 { font-size: 1.3rem; margin-bottom: 0.5rem; }
-            p { font-size: 0.85rem; margin-bottom: 0.5rem; }
-            .admin-tabs { flex-wrap: wrap; gap: 0.2rem; margin-bottom: 0.5rem; }
-            .admin-tab { padding: 0.4rem; font-size: 0.8rem; flex: 1 1 45%; text-align: center; }
-            .section-card { padding: 0.8rem; margin-bottom: 0.8rem; }
-            .mentor-block { padding: 0.8rem; }
-            .form-group label { font-size: 0.85rem; }
-            input, select, button { padding: 0.5rem; font-size: 0.85rem; }
-            th, td { padding: 0.4rem; font-size: 0.8rem; }
-            .badge { padding: 0.2rem 0.4rem; font-size: 0.75rem; }
+            body {
+                padding: 0.5rem;
+            }
+
+            .admin-container {
+                padding: 0.5rem;
+                margin-top: 0;
+            }
+
+            h1 {
+                font-size: 1.3rem;
+                margin-bottom: 0.5rem;
+            }
+
+            p {
+                font-size: 0.85rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .admin-tabs {
+                flex-wrap: wrap;
+                gap: 0.2rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .admin-tab {
+                padding: 0.4rem;
+                font-size: 0.8rem;
+                flex: 1 1 45%;
+                text-align: center;
+            }
+
+            .section-card {
+                padding: 0.8rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .mentor-block {
+                padding: 0.8rem;
+            }
+
+            .form-group label {
+                font-size: 0.85rem;
+            }
+
+            input,
+            select,
+            button {
+                padding: 0.5rem;
+                font-size: 0.85rem;
+            }
+
+            th,
+            td {
+                padding: 0.4rem;
+                font-size: 0.8rem;
+            }
+
+            .badge {
+                padding: 0.2rem 0.4rem;
+                font-size: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -229,7 +284,8 @@
                 </div>
                 <div id="admin-score-detail-wrapper">
                     <!-- BẢNG XẾP HẠNG: ÁO DÀI -->
-                    <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: var(--accent-blue);">🏆 Bảng Xếp Hạng: Phần Thi Áo Dài</h4>
+                    <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: var(--accent-blue);">🏆 Bảng Xếp Hạng:
+                        Phần Thi Áo Dài</h4>
                     <div class="table-responsive">
                         <table class="custom-table">
                             <thead>
@@ -237,18 +293,21 @@
                                     <th style="width: 70px; text-align: center;">Hạng</th>
                                     <th>Thí sinh</th>
                                     <th>Đội Mentor</th>
-                                    <th>Chi tiết Điểm (BGK & Nhận xét)</th>
+                                    <th>Chi tiết Điểm </th>
                                     <th style="width: 100px; text-align: center;">Điểm TB</th>
                                 </tr>
                             </thead>
                             <tbody id="aodai-admin-board">
-                                <tr><td colspan="5" style="text-align: center; font-style: italic;">Đang tải...</td></tr>
+                                <tr>
+                                    <td colspan="5" style="text-align: center; font-style: italic;">Đang tải...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
 
                     <!-- BẢNG XẾP HẠNG: TRUYỀN CẢM HỨNG -->
-                    <h4 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-blue);">🏆 Bảng Xếp Hạng: Phần Thi Truyền Cảm Hứng</h4>
+                    <h4 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-blue);">🏆 Bảng Xếp Hạng:
+                        Phần Thi Truyền Cảm Hứng</h4>
                     <div class="table-responsive">
                         <table class="custom-table">
                             <thead>
@@ -256,12 +315,14 @@
                                     <th style="width: 70px; text-align: center;">Hạng</th>
                                     <th>Thí sinh</th>
                                     <th>Đội Mentor</th>
-                                    <th>Chi tiết Điểm (BGK & Nhận xét)</th>
+                                    <th>Chi tiết Điểm </th>
                                     <th style="width: 100px; text-align: center;">Điểm TB</th>
                                 </tr>
                             </thead>
                             <tbody id="inspiration-admin-board">
-                                <tr><td colspan="5" style="text-align: center; font-style: italic;">Đang tải...</td></tr>
+                                <tr>
+                                    <td colspan="5" style="text-align: center; font-style: italic;">Đang tải...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -272,7 +333,8 @@
         <div id="tab-history" class="tab-content" style="display: none;">
             <div class="section-card">
                 <h3>🕰 Lịch Sử Các Phần Thi Đã Lưu</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Tại đây lưu trữ điểm của các phần thi (các vòng) đã hoàn thành.</p>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Tại đây lưu trữ điểm của
+                    các phần thi (các vòng) đã hoàn thành.</p>
                 <div id="history-container">
                     <!-- Sẽ render qua JS -->
                 </div>
@@ -324,7 +386,7 @@
                 if (!res.ok) return;
                 const data = await res.json();
                 renderArchivedRounds(data.archives || []);
-            } catch(e) { console.error('Lỗi tải lịch sử:', e); }
+            } catch (e) { console.error('Lỗi tải lịch sử:', e); }
         }
 
         function renderArchivedRounds(archives) {
@@ -345,7 +407,7 @@
                     // Nhóm điểm theo thí sinh
                     const grouped = {};
                     arc.scores.forEach(s => {
-                        if(!grouped[s.candidateId]) grouped[s.candidateId] = [];
+                        if (!grouped[s.candidateId]) grouped[s.candidateId] = [];
                         grouped[s.candidateId].push(s);
                     });
 
@@ -353,11 +415,11 @@
                         const cand = appData.candidates.find(c => c.id === candId) || { name: 'Thí sinh (đã xóa)' };
                         const candScores = grouped[candId];
                         const details = candScores.map(s => {
-                            let r1Text = `Áo dài ${s.aoDai||0}`;
+                            let r1Text = `Áo dài ${s.aoDai || 0}`;
                             if (s.details && s.details.r1) {
                                 r1Text += ` [${s.details.r1.join(' + ')}]`;
                             }
-                            let r2Text = `Truyền cảm hứng ${s.inspiration||0}`;
+                            let r2Text = `Truyền cảm hứng ${s.inspiration || 0}`;
                             if (s.details && s.details.r2) {
                                 r2Text += ` [${s.details.r2.join(' + ')}]`;
                             }
@@ -404,7 +466,7 @@
 
                 const isSelf = user.username === 'admin';
                 const isActive = user.status !== 'inactive';
-                const statusHtml = isActive 
+                const statusHtml = isActive
                     ? `<span class="badge" style="background:rgba(82,196,26,0.15); border:1px solid #52c41a; color:#52c41a;">🟢 Đang hoạt động</span>`
                     : `<span class="badge" style="background:rgba(255,77,79,0.15); border:1px solid #ff4d4f; color:#ff4d4f;">🔴 Bị khóa</span>`;
 
@@ -559,7 +621,7 @@
             const rankedCandidates = appData.candidates.map(cand => {
                 const candScores = appData.scores.filter(s => s.candidateId === cand.id);
                 const validScores = candScores.filter(s => typeof s[type] !== 'undefined');
-                
+
                 let sum = 0;
                 let count = validScores.length;
                 let scoresDetailsHTML = '';
@@ -569,13 +631,13 @@
                 } else {
                     scoresDetailsHTML = validScores.map(s => {
                         sum += s[type];
-                        
+
                         let detailsStr = '';
                         if (s.details) {
                             if (type === 'aoDai' && s.details.r1) {
-                                detailsStr = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.1rem;">Chi tiết: [${s.details.r1.map(d=>d+'đ').join(' | ')}]</div>`;
+                                detailsStr = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.1rem;">Chi tiết: [${s.details.r1.map(d => d + 'đ').join(' | ')}]</div>`;
                             } else if (type === 'inspiration' && s.details.r2) {
-                                detailsStr = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.1rem;">Chi tiết: [${s.details.r2.map(d=>d+'đ').join(' | ')}]</div>`;
+                                detailsStr = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.1rem;">Chi tiết: [${s.details.r2.map(d => d + 'đ').join(' | ')}]</div>`;
                             }
                         }
 
@@ -614,8 +676,8 @@
                 else if (index === 1) rankClass = 'rank-2';
                 else if (index === 2) rankClass = 'rank-3';
 
-                const avgDisplay = cand.avgScore !== null 
-                    ? `<span class="badge btn-success" style="font-size: 1rem; padding: 0.3rem 0.8rem;">${cand.avgScore.toFixed(2)}</span>` 
+                const avgDisplay = cand.avgScore !== null
+                    ? `<span class="badge btn-success" style="font-size: 1rem; padding: 0.3rem 0.8rem;">${cand.avgScore.toFixed(2)}</span>`
                     : '<span style="color: var(--text-muted); font-style: italic;">Chưa chấm</span>';
 
                 const team = appData.teams.find(t => t.id === cand.teamId);
