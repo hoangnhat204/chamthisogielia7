@@ -278,6 +278,9 @@
                     <button class="btn-secondary" id="btn-toggle-admin-scores" onclick="toggleAdminScoreTable()"
                         style="padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;">🙈 Ẩn Bảng Điểm Chi
                         Tiết</button>
+                    <button class="btn-primary" id="btn-export-excel" onclick="exportScoresToExcel()"
+                        style="padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;background:#1890ff;border:none;">📥
+                        Xuất File Excel</button>
                     <button class="btn-danger" id="btn-archive-scores" onclick="archiveScores()"
                         style="padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;background:rgba(82, 196, 26, 0.2);border:1px solid #52c41a;color:#52c41a;">💾
                         Lưu Bảng Hiện Tại & Tạo Bảng Mới</button>
@@ -578,6 +581,77 @@
                 w.style.display = 'none';
                 btn.textContent = '👁️ Hiện Bảng Điểm Chi Tiết';
             }
+        }
+
+        function exportScoresToExcel() {
+            if (!appData || !appData.candidates || appData.candidates.length === 0) {
+                showAlert('Không có dữ liệu để xuất!', 'error');
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+
+            const generateSheetData = (type) => {
+                const judges = [...new Set(appData.scores.filter(s => typeof s[type] !== 'undefined').map(s => s.judge))];
+                
+                let headerRow = ['Hạng', 'SBD', 'Thí Sinh', 'Đội Mentor'];
+                judges.forEach(j => {
+                    headerRow.push(`${j} - Tổng`);
+                    headerRow.push(`${j} - Chi tiết`);
+                });
+                headerRow.push('Điểm TB');
+
+                const rankedCandidates = appData.candidates.map(cand => {
+                    const validScores = appData.scores.filter(s => s.candidateId === cand.id && typeof s[type] !== 'undefined');
+                    let sum = 0;
+                    validScores.forEach(s => sum += s[type]);
+                    const avg = validScores.length > 0 ? sum / validScores.length : 0;
+                    return { cand, validScores, avg };
+                }).sort((a, b) => b.avg - a.avg);
+
+                const data = [headerRow];
+
+                rankedCandidates.forEach((item, idx) => {
+                    if (item.avg === 0 && item.validScores.length === 0) return; // Chưa có điểm thì bỏ qua
+                    const team = appData.teams.find(t => t.id === item.cand.teamId);
+                    
+                    const row = [
+                        idx + 1,
+                        item.cand.sbd || '',
+                        item.cand.name || '',
+                        team ? team.name : ''
+                    ];
+                    
+                    judges.forEach(j => {
+                        const s = item.validScores.find(score => score.judge === j);
+                        if (s) {
+                            row.push(s[type]);
+                            let detailsStr = '';
+                            if (s.details) {
+                                if (type === 'aoDai' && s.details.r1) detailsStr = s.details.r1.join(' | ');
+                                if (type === 'inspiration' && s.details.r2) detailsStr = s.details.r2.join(' | ');
+                            }
+                            row.push(detailsStr);
+                        } else {
+                            row.push('');
+                            row.push('');
+                        }
+                    });
+                    row.push(item.avg.toFixed(2));
+                    data.push(row);
+                });
+                
+                return XLSX.utils.aoa_to_sheet(data);
+            };
+
+            const sheetAoDai = generateSheetData('aoDai');
+            const sheetInspiration = generateSheetData('inspiration');
+
+            XLSX.utils.book_append_sheet(wb, sheetAoDai, 'Phần thi Áo Dài');
+            XLSX.utils.book_append_sheet(wb, sheetInspiration, 'Truyền Cảm Hứng');
+
+            XLSX.writeFile(wb, `BangDiem_Sogielia_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            showAlert('✅ Đã tải xuống file Excel!');
         }
 
         async function archiveScores() {
