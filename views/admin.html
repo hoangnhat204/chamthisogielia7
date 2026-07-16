@@ -634,11 +634,21 @@
 
                         let detailsStr = '';
                         if (s.details) {
-                            if (type === 'aoDai' && s.details.r1) {
-                                detailsStr = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.1rem;">Chi tiết: [${s.details.r1.map(d => d + 'đ').join(' | ')}]</div>`;
-                            } else if (type === 'inspiration' && s.details.r2) {
-                                detailsStr = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.1rem;">Chi tiết: [${s.details.r2.map(d => d + 'đ').join(' | ')}]</div>`;
+                            if (type === 'aoDai') {
+                                if (s.details.r1) {
+                                    detailsStr = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.1rem;">Chi tiết: [${s.details.r1.map(d => d + 'đ').join(' | ')}]</div>`;
+                                } else {
+                                    detailsStr = `<div style="font-size:0.75rem; color:#ff4d4f; margin-top:0.1rem;">(Chưa có chi tiết - Hãy làm mới (Ctrl + F5) trang chấm điểm)</div>`;
+                                }
+                            } else if (type === 'inspiration') {
+                                if (s.details.r2) {
+                                    detailsStr = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.1rem;">Chi tiết: [${s.details.r2.map(d => d + 'đ').join(' | ')}]</div>`;
+                                } else {
+                                    detailsStr = `<div style="font-size:0.75rem; color:#ff4d4f; margin-top:0.1rem;">(Chưa có chi tiết - Hãy làm mới (Ctrl + F5) trang chấm điểm)</div>`;
+                                }
                             }
+                        } else {
+                            detailsStr = `<div style="font-size:0.75rem; color:#ff4d4f; margin-top:0.1rem;">(Chưa có dữ liệu chi tiết)</div>`;
                         }
 
                         return `

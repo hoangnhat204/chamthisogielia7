@@ -207,6 +207,22 @@
             "judge": "bgk1",
             "candidateId": "candidate_1783960000009",
             "aoDai": 5
+        },
+        {
+            "judge": "testJudge",
+            "candidateId": "cand123",
+            "details": {
+                "r1": "[1,2,3]"
+            },
+            "aoDai": 6.5,
+            "inspiration": 0
+        },
+        {
+            "judge": "testJudge2",
+            "candidateId": "cand456",
+            "details": {},
+            "aoDai": 4,
+            "inspiration": 0
         }
     ],
     "teams": [
