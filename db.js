@@ -148,12 +148,22 @@ module.exports = {
             }));
 
             const scores = await pool.query('SELECT * FROM scores');
-            const mappedScores = scores.rows.map(s => ({
-                judge: s.judge,
-                candidateId: s.candidate_id,
-                aoDai: s.ao_dai ? parseFloat(s.ao_dai) : undefined,
-                inspiration: s.inspiration ? parseFloat(s.inspiration) : undefined
-            }));
+            const mappedScores = scores.rows.map(s => {
+                let aoDai = s.ao_dai !== null ? parseFloat(s.ao_dai) : undefined;
+                let inspiration = s.inspiration !== null ? parseFloat(s.inspiration) : undefined;
+                
+                // Khắc phục lỗi dữ liệu cũ bị chèn 0 thay vì null khi chưa chấm
+                if (aoDai === 0 && (!s.details || !s.details.r1)) aoDai = undefined;
+                if (inspiration === 0 && (!s.details || !s.details.r2)) inspiration = undefined;
+
+                return {
+                    judge: s.judge,
+                    candidateId: s.candidate_id,
+                    aoDai,
+                    inspiration,
+                    details: s.details
+                };
+            });
 
             return {
                 teams: teams.rows,
@@ -241,8 +251,8 @@ module.exports = {
                     await pool.query('UPDATE scores SET inspiration = $1, details = $4 WHERE judge = $2 AND candidate_id = $3', [inspiration, judge, candidateId, currentDetails]);
                 }
             } else {
-                const ad = typeof aoDai !== 'undefined' ? aoDai : 0;
-                const ins = typeof inspiration !== 'undefined' ? inspiration : 0;
+                const ad = typeof aoDai !== 'undefined' ? aoDai : null;
+                const ins = typeof inspiration !== 'undefined' ? inspiration : null;
                 let currentDetails = {};
                 if (detailsR1) currentDetails.r1 = detailsR1;
                 if (detailsR2) currentDetails.r2 = detailsR2;
@@ -293,7 +303,7 @@ module.exports = {
             )`);
             const scoresData = await pool.query('SELECT * FROM scores');
             const dataToArchive = { scores: scoresData.rows };
-            await pool.query('INSERT INTO archived_rounds (name, data) VALUES ($1, $2)', [roundName, JSON.stringify(dataToArchive)]);
+            await pool.query('INSERT INTO archived_rounds (name, data) VALUES ($1, $2)', [roundName, dataToArchive]);
             await pool.query('DELETE FROM scores');
         } else {
             const contest = readJSON(contestFilePath, { teams: [], candidates: [], scores: [], archivedRounds: [] });
@@ -326,7 +336,8 @@ module.exports = {
                     judge: s.judge,
                     candidateId: s.candidate_id,
                     aoDai: s.ao_dai ? parseFloat(s.ao_dai) : undefined,
-                    inspiration: s.inspiration ? parseFloat(s.inspiration) : undefined
+                    inspiration: s.inspiration ? parseFloat(s.inspiration) : undefined,
+                    details: s.details
                 })),
                 createdAt: r.created_at
             }));
