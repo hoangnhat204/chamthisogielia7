@@ -264,7 +264,9 @@
                 </div>
                 <div class="wizard-card">
                     <div class="round-badge" id="round-badge-text">Bán Kết</div>
-                    <div id="round-theme-text" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; font-style: italic; display: none;">Chủ Đề: Người Đã Truyền Cảm Hứng Cho Bạn</div>
+                    <div id="round-theme-text"
+                        style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; font-style: italic; display: none;">
+                        Chủ Đề: Người Đã Truyền Cảm Hứng Cho Bạn</div>
                     <div class="candidate-name" id="cand-name-text">Nguyễn Văn A</div>
                     <form id="score-form" onsubmit="handleFormSubmit(event)">
                         <div id="criteria-container"></div>
@@ -298,7 +300,9 @@
                                         <th style="text-align:center;width:140px;">Áo Dài (Vòng 1)</th>
                                         <th style="text-align:center;width:160px;">
                                             Truyền Cảm Hứng (Vòng 2)<br>
-                                            <span style="font-size:0.75rem; font-weight:normal; color: var(--text-muted);">Chủ Đề: Người Đã Truyền Cảm Hứng Cho Bạn</span>
+                                            <span
+                                                style="font-size:0.75rem; font-weight:normal; color: var(--text-muted);">Chủ
+                                                Đề: Người Đã Truyền Cảm Hứng Cho Bạn</span>
                                         </th>
                                     </tr>
                                 </thead>
@@ -428,7 +432,7 @@
 
             const activeCriteria = currentRoundPhase === 1 ? criteriaR1 : criteriaR2;
             document.getElementById('round-badge-text').textContent = currentRoundPhase === 1 ? "Vòng 1: Áo Dài" : "Vòng 2: Truyền Cảm Hứng";
-            
+
             const themeText = document.getElementById('round-theme-text');
             if (themeText) {
                 themeText.style.display = currentRoundPhase === 2 ? 'block' : 'none';
@@ -565,13 +569,13 @@
             tbody.innerHTML = '';
             (appData.candidates || []).forEach(c => {
                 const s = appData.scores.find(v => v.candidateId === c.id && v.judge === currentUser.username) || {};
-                
+
                 let r1Html = '-';
                 if (typeof s.aoDai !== 'undefined') {
                     r1Html = `<div style="font-weight:bold; color:var(--accent-blue); font-size:1.1rem;">${s.aoDai.toFixed(1)}đ</div>`;
                     if (s.details && s.details.r1) {
                         r1Html += `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">
-                            [${s.details.r1.map(d=>d+'đ').join(' | ')}]
+                            [${s.details.r1.map(d => d + 'đ').join(' | ')}]
                         </div>`;
                     }
                 }
@@ -581,7 +585,7 @@
                     r2Html = `<div style="font-weight:bold; color:#52c41a; font-size:1.1rem;">${s.inspiration.toFixed(1)}đ</div>`;
                     if (s.details && s.details.r2) {
                         r2Html += `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">
-                            [${s.details.r2.map(d=>d+'đ').join(' | ')}]
+                            [${s.details.r2.map(d => d + 'đ').join(' | ')}]
                         </div>`;
                     }
                 }
