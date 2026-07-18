@@ -264,6 +264,7 @@
                 </div>
                 <div class="wizard-card">
                     <div class="round-badge" id="round-badge-text">Bán Kết</div>
+                    <div id="round-theme-text" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; font-style: italic; display: none;">Chủ Đề: Người Đã Truyền Cảm Hứng Cho Bạn</div>
                     <div class="candidate-name" id="cand-name-text">Nguyễn Văn A</div>
                     <form id="score-form" onsubmit="handleFormSubmit(event)">
                         <div id="criteria-container"></div>
@@ -295,7 +296,10 @@
                                     <tr>
                                         <th>Thí sinh</th>
                                         <th style="text-align:center;width:140px;">Áo Dài (Vòng 1)</th>
-                                        <th style="text-align:center;width:160px;">Truyền Cảm Hứng (Vòng 2)</th>
+                                        <th style="text-align:center;width:160px;">
+                                            Truyền Cảm Hứng (Vòng 2)<br>
+                                            <span style="font-size:0.75rem; font-weight:normal; color: var(--text-muted);">Chủ Đề: Người Đã Truyền Cảm Hứng Cho Bạn</span>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody id="summary-table-body"></tbody>
@@ -424,6 +428,11 @@
 
             const activeCriteria = currentRoundPhase === 1 ? criteriaR1 : criteriaR2;
             document.getElementById('round-badge-text').textContent = currentRoundPhase === 1 ? "Vòng 1: Áo Dài" : "Vòng 2: Truyền Cảm Hứng";
+            
+            const themeText = document.getElementById('round-theme-text');
+            if (themeText) {
+                themeText.style.display = currentRoundPhase === 2 ? 'block' : 'none';
+            }
 
             selectedCriteria = activeCriteria.map(() => null);
             renderCriteria(activeCriteria);
