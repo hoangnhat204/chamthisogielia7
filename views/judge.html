@@ -310,6 +310,11 @@
                             </table>
                         </div>
                     </div>
+
+                    <div id="next-round-container" style="display:none; margin-top: 1.5rem;">
+                        <button class="btn-success" onclick="startRound2()" style="width:100%; font-size: 1.1rem; padding: 0.8rem;">Tiếp Tục Chấm Vòng 2 🚀</button>
+                    </div>
+
                     <p style="font-style:italic;font-size:0.85rem;color:var(--text-muted);margin-top:1rem;">⚠️ Điểm số
                         đã
                         lưu trữ chính thức và không được chỉnh sửa.</p>
@@ -396,6 +401,23 @@
                     return;
                 }
             }
+
+            // Kiểm tra xem vòng 2 đã bắt đầu chấm ai chưa
+            let hasAnyR2Score = false;
+            for (let i = 0; i < cand.length; i++) {
+                const s = appData.scores.find(v => v.candidateId === cand[i].id && v.judge === currentUser.username);
+                if (s && typeof s.inspiration !== 'undefined') {
+                    hasAnyR2Score = true;
+                    break;
+                }
+            }
+
+            if (!hasAnyR2Score && cand.length > 0) {
+                // Vòng 1 xong hết, vòng 2 chưa chấm ai => Hiện màn hình chuyển vòng
+                showCompletion(false, true);
+                return;
+            }
+
             // Kiểm tra vòng 2
             for (let i = 0; i < cand.length; i++) {
                 const s = appData.scores.find(v => v.candidateId === cand[i].id && v.judge === currentUser.username);
@@ -406,7 +428,13 @@
                     return;
                 }
             }
-            showCompletion();
+            showCompletion(true, false);
+        }
+
+        function startRound2() {
+            currentRoundPhase = 2;
+            currentCandidateIndex = 0;
+            renderWizard();
         }
 
         function renderWizard() {
@@ -526,12 +554,10 @@
                     currentCandidateIndex++;
                     if (currentCandidateIndex >= appData.candidates.length) {
                         if (currentRoundPhase === 1) {
-                            currentRoundPhase = 2;
-                            currentCandidateIndex = 0;
-                            showAlert('🎉 Đã chấm xong Vòng 1. Chuyển sang Vòng 2!');
-                            renderWizard();
+                            showCompletion(false, true);
+                            showAlert('🎉 Đã chấm xong Vòng 1!');
                         } else {
-                            showCompletion();
+                            showCompletion(true, false);
                             showAlert('🎉 Đã hoàn thành chấm điểm tất cả thí sinh!');
                         }
                     } else {
@@ -552,12 +578,20 @@
             }
         }
 
-        function showCompletion(isFinished = true) {
+        function showCompletion(isFinished = true, isRound1Done = false) {
             document.getElementById('wizard-view').style.display = 'none';
             const comp = document.getElementById('completion-view');
             comp.style.display = 'block';
 
-            if (!isFinished) {
+            const nextBtn = document.getElementById('next-round-container');
+            if (nextBtn) {
+                nextBtn.style.display = isRound1Done ? 'block' : 'none';
+            }
+
+            if (isRound1Done) {
+                document.getElementById('completion-title').textContent = 'Hoàn Thành Vòng 1';
+                document.getElementById('completion-desc').textContent = 'Bạn đã chấm xong Vòng 1. Dưới đây là bảng điểm hiện tại. Hãy bấm nút bên dưới để chuyển sang Vòng 2.';
+            } else if (!isFinished) {
                 document.getElementById('completion-title').textContent = 'Bảng Điểm Tạm Thời';
                 document.getElementById('completion-desc').textContent = 'Bạn có thể xem lại điểm đã chấm. Bấm "Tiếp Tục Chấm Điểm" để quay lại.';
             } else {
