@@ -170,15 +170,19 @@
         @media (max-width: 450px) {
             body {
                 padding: 0.3rem;
-            }
-
-            .header-nav {
-                margin-bottom: 0.2rem;
-                padding-bottom: 0.2rem;
+                height: auto;
+                min-height: 100vh;
+                overflow-y: auto;
             }
 
             .glass-container {
                 padding: 0.5rem;
+                height: auto;
+                overflow: visible;
+            }
+
+            .scrollable-content {
+                overflow: visible;
             }
 
             h1 {
