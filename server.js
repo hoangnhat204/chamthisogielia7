@@ -368,7 +368,7 @@ app.post('/admin/update-kahoot', requireAdmin, async (req, res) => {
 
 // Ban giám khảo chấm điểm / cập nhật điểm thí sinh (Bán kết: Áo dài, Truyền cảm hứng)
 app.post('/judge/score', requireJudge, async (req, res) => {
-    const { candidateId, aoDai, inspiration, detailsR1, detailsR2 } = req.body;
+    const { candidateId, aoDai, inspiration, ungXu, detailsR1, detailsR2, detailsR3 } = req.body;
     if (!candidateId) {
         return res.status(400).json({ error: 'missing_candidate_id' });
     }
@@ -385,6 +385,12 @@ app.post('/judge/score', requireJudge, async (req, res) => {
         parsedInspiration = parseFloat(inspiration);
         if (isNaN(parsedInspiration) || parsedInspiration < 0 || parsedInspiration > 10) return res.status(400).json({ error: 'invalid_inspiration' });
     }
+
+    let parsedUngXu = undefined;
+    if (typeof ungXu !== 'undefined') {
+        parsedUngXu = parseFloat(ungXu);
+        if (isNaN(parsedUngXu) || parsedUngXu < 0 || parsedUngXu > 10) return res.status(400).json({ error: 'invalid_ungxu' });
+    }
     
     console.log("POST /judge/score Received:", req.body);
     let parsedDetailsR1 = undefined;
@@ -397,10 +403,29 @@ app.post('/judge/score', requireJudge, async (req, res) => {
         try { parsedDetailsR2 = JSON.parse(detailsR2); } catch (e) {}
     }
 
+    let parsedDetailsR3 = undefined;
+    if (detailsR3) {
+        try { parsedDetailsR3 = JSON.parse(detailsR3); } catch (e) {}
+    }
+
     try {
-        await db.saveScore(judgeUsername, candidateId, parsedAoDai, parsedInspiration, parsedDetailsR1, parsedDetailsR2);
+        await db.saveScore(judgeUsername, candidateId, parsedAoDai, parsedInspiration, parsedUngXu, parsedDetailsR1, parsedDetailsR2, parsedDetailsR3);
         res.json({ success: true });
     } catch (err) {
+        res.status(500).json({ error: 'db_error' });
+    }
+});
+
+app.post('/admin/toggle-r7', requireAdmin, async (req, res) => {
+    const { candidateId, selected } = req.body;
+    if (!candidateId || selected === undefined) {
+        return res.status(400).json({ error: 'missing_data' });
+    }
+    try {
+        await db.toggleCandidateR7(candidateId, selected === 'true' || selected === true);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'db_error' });
     }
 });

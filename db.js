@@ -23,6 +23,14 @@ if (usePostgres) {
         .then(() => console.log('Auto-migration: details column checked.'))
         .catch(err => console.error('Auto-migration details error:', err.message));
 
+    pool.query("ALTER TABLE candidates ADD COLUMN IF NOT EXISTS selected_r7 BOOLEAN DEFAULT FALSE")
+        .then(() => console.log('Auto-migration: selected_r7 column checked.'))
+        .catch(err => console.error('Auto-migration selected_r7 error:', err.message));
+
+    pool.query("ALTER TABLE scores ADD COLUMN IF NOT EXISTS ung_xu NUMERIC(4,2)")
+        .then(() => console.log('Auto-migration: ung_xu column checked.'))
+        .catch(err => console.error('Auto-migration ung_xu error:', err.message));
+
     pool.query(`CREATE TABLE IF NOT EXISTS archived_rounds (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
@@ -144,23 +152,27 @@ module.exports = {
                 name: c.name,
                 sbd: c.sbd,
                 teamId: c.team_id,
-                kahoot: c.kahoot ? parseFloat(c.kahoot) : 0
+                kahoot: c.kahoot ? parseFloat(c.kahoot) : 0,
+                selectedForR7: !!c.selected_r7
             }));
 
             const scores = await pool.query('SELECT * FROM scores');
             const mappedScores = scores.rows.map(s => {
                 let aoDai = s.ao_dai !== null ? parseFloat(s.ao_dai) : undefined;
                 let inspiration = s.inspiration !== null ? parseFloat(s.inspiration) : undefined;
+                let ungXu = s.ung_xu !== null ? parseFloat(s.ung_xu) : undefined;
                 
                 // Khắc phục lỗi dữ liệu cũ bị chèn 0 thay vì null khi chưa chấm
                 if (aoDai === 0 && (!s.details || !s.details.r1)) aoDai = undefined;
                 if (inspiration === 0 && (!s.details || !s.details.r2)) inspiration = undefined;
+                if (ungXu === 0 && (!s.details || !s.details.r3)) ungXu = undefined;
 
                 return {
                     judge: s.judge,
                     candidateId: s.candidate_id,
                     aoDai,
                     inspiration,
+                    ungXu,
                     details: s.details
                 };
             });
@@ -205,10 +217,10 @@ module.exports = {
 
     addCandidate: async (id, name, sbd, teamId) => {
         if (usePostgres) {
-            await pool.query('INSERT INTO candidates (id, name, sbd, team_id, kahoot) VALUES ($1, $2, $3, $4, 0)', [id, name, sbd, teamId]);
+            await pool.query('INSERT INTO candidates (id, name, sbd, team_id, kahoot, selected_r7) VALUES ($1, $2, $3, $4, 0, FALSE)', [id, name, sbd, teamId]);
         } else {
             const contest = readJSON(contestFilePath, { teams: [], candidates: [], scores: [] });
-            contest.candidates.push({ id, name, sbd, teamId, kahoot: 0 });
+            contest.candidates.push({ id, name, sbd, teamId, kahoot: 0, selectedForR7: false });
             writeJSON(contestFilePath, contest);
         }
     },
@@ -237,46 +249,71 @@ module.exports = {
         }
     },
 
-    saveScore: async (judge, candidateId, aoDai, inspiration, detailsR1, detailsR2) => {
+    toggleCandidateR7: async (candidateId, selected) => {
+        if (usePostgres) {
+            await pool.query('UPDATE candidates SET selected_r7 = $1 WHERE id = $2', [selected, candidateId]);
+        } else {
+            const contest = readJSON(contestFilePath, { teams: [], candidates: [], scores: [] });
+            const cand = contest.candidates.find(c => c.id === candidateId);
+            if (cand) {
+                cand.selectedForR7 = selected;
+                writeJSON(contestFilePath, contest);
+            }
+        }
+    },
+
+    saveScore: async (judge, candidateId, aoDai, inspiration, ungXu, detailsR1, detailsR2, detailsR3) => {
         if (usePostgres) {
             const existing = await pool.query('SELECT * FROM scores WHERE judge = $1 AND candidate_id = $2', [judge, candidateId]);
             if (existing.rows.length > 0) {
                 let currentDetails = existing.rows[0].details || {};
                 if (detailsR1) currentDetails.r1 = detailsR1;
                 if (detailsR2) currentDetails.r2 = detailsR2;
+                if (detailsR3) currentDetails.r3 = detailsR3;
                 
                 if (typeof aoDai !== 'undefined') {
                     await pool.query('UPDATE scores SET ao_dai = $1, details = $4 WHERE judge = $2 AND candidate_id = $3', [aoDai, judge, candidateId, currentDetails]);
                 } else if (typeof inspiration !== 'undefined') {
                     await pool.query('UPDATE scores SET inspiration = $1, details = $4 WHERE judge = $2 AND candidate_id = $3', [inspiration, judge, candidateId, currentDetails]);
+                } else if (typeof ungXu !== 'undefined') {
+                    await pool.query('UPDATE scores SET ung_xu = $1, details = $4 WHERE judge = $2 AND candidate_id = $3', [ungXu, judge, candidateId, currentDetails]);
                 }
             } else {
                 const ad = typeof aoDai !== 'undefined' ? aoDai : null;
                 const ins = typeof inspiration !== 'undefined' ? inspiration : null;
+                const ux = typeof ungXu !== 'undefined' ? ungXu : null;
                 let currentDetails = {};
                 if (detailsR1) currentDetails.r1 = detailsR1;
                 if (detailsR2) currentDetails.r2 = detailsR2;
-                await pool.query('INSERT INTO scores (judge, candidate_id, ao_dai, inspiration, details) VALUES ($1, $2, $3, $4, $5)', [judge, candidateId, ad, ins, currentDetails]);
+                if (detailsR3) currentDetails.r3 = detailsR3;
+                await pool.query('INSERT INTO scores (judge, candidate_id, ao_dai, inspiration, ung_xu, details) VALUES ($1, $2, $3, $4, $5, $6)', [judge, candidateId, ad, ins, ux, currentDetails]);
             }
         } else {
             const contest = readJSON(contestFilePath, { teams: [], candidates: [], scores: [] });
             const existingScoreIdx = contest.scores.findIndex(s => s.candidateId === candidateId && s.judge === judge);
-            let currentScore = existingScoreIdx > -1 ? contest.scores[existingScoreIdx] : {
-                judge: judge,
-                candidateId: candidateId,
-                details: {}
-            };
-
-            if (!currentScore.details) currentScore.details = {};
-            if (typeof aoDai !== 'undefined') currentScore.aoDai = aoDai;
-            if (typeof inspiration !== 'undefined') currentScore.inspiration = inspiration;
-            if (detailsR1) currentScore.details.r1 = detailsR1;
-            if (detailsR2) currentScore.details.r2 = detailsR2;
-
             if (existingScoreIdx > -1) {
+                let currentScore = contest.scores[existingScoreIdx];
+                if (!currentScore.details) currentScore.details = {};
+                if (typeof aoDai !== 'undefined') currentScore.aoDai = aoDai;
+                if (typeof inspiration !== 'undefined') currentScore.inspiration = inspiration;
+                if (typeof ungXu !== 'undefined') currentScore.ungXu = ungXu;
+                if (detailsR1) currentScore.details.r1 = detailsR1;
+                if (detailsR2) currentScore.details.r2 = detailsR2;
+                if (detailsR3) currentScore.details.r3 = detailsR3;
                 contest.scores[existingScoreIdx] = currentScore;
             } else {
-                contest.scores.push(currentScore);
+                let currentDetails = {};
+                if (detailsR1) currentDetails.r1 = detailsR1;
+                if (detailsR2) currentDetails.r2 = detailsR2;
+                if (detailsR3) currentDetails.r3 = detailsR3;
+                contest.scores.push({
+                    judge,
+                    candidateId,
+                    aoDai,
+                    inspiration,
+                    ungXu,
+                    details: currentDetails
+                });
             }
             writeJSON(contestFilePath, contest);
         }
