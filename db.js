@@ -208,7 +208,7 @@ module.exports = {
 
     addTeam: async (id, name, mentors) => {
         if (usePostgres) {
-            await pool.query('INSERT INTO teams (id, name, mentors) VALUES ($1, $2, $3)', [id, name, mentors]);
+            await pool.query('INSERT INTO teams (id, name, mentors) VALUES ($1, $2, $3)', [id, name, JSON.stringify(mentors)]);
         } else {
             const contest = readJSON(contestFilePath, { teams: [], candidates: [], scores: [] });
             contest.teams.push({ id, name, mentors });
@@ -426,7 +426,7 @@ module.exports = {
                 const existing = await pool.query('SELECT id FROM teams WHERE LOWER(TRIM(name)) = LOWER(TRIM($1))', [newTeam.name]);
                 if (existing.rows.length === 0) {
                     const teamId = 'team_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-                    await pool.query('INSERT INTO teams (id, name, mentors) VALUES ($1, $2, $3)', [teamId, newTeam.name.trim(), newTeam.mentors]);
+                    await pool.query('INSERT INTO teams (id, name, mentors) VALUES ($1, $2, $3)', [teamId, newTeam.name.trim(), JSON.stringify(newTeam.mentors)]);
                     newTeam.mappedId = teamId;
                 } else {
                     newTeam.mappedId = existing.rows[0].id;
@@ -437,7 +437,7 @@ module.exports = {
                             currentMentors.push(m.trim());
                         }
                     });
-                    await pool.query('UPDATE teams SET mentors = $1 WHERE id = $2', [currentMentors, newTeam.mappedId]);
+                    await pool.query('UPDATE teams SET mentors = $1 WHERE id = $2', [JSON.stringify(currentMentors), newTeam.mappedId]);
                 }
             }
 
@@ -547,7 +547,7 @@ module.exports = {
 
     updateScoringMode: async (mode) => {
         if (usePostgres) {
-            await pool.query("INSERT INTO app_settings (key, value) VALUES ('scoringMode', $1) ON CONFLICT (key) DO UPDATE SET value = $1", [mode]);
+            await pool.query("INSERT INTO app_settings (key, value) VALUES ('scoringMode', $1) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [mode]);
         } else {
             const data = readJSON(contestFilePath, { teams: [], candidates: [], scores: [], scoringMode: 'all' });
             data.scoringMode = mode;

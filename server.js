@@ -152,10 +152,11 @@ app.post('/admin/set-scoring-mode', requireAdmin, async (req, res) => {
             await db.updateScoringMode(mode);
             res.json({ success: true });
         } else {
-            res.status(400).json({ error: 'invalid_mode' });
+            res.status(400).json({ error: 'invalid_mode', modeReceived: mode });
         }
     } catch (err) {
-        res.status(500).json({ error: 'db_error' });
+        console.error('[set-scoring-mode] DB ERROR:', err);
+        res.status(500).json({ error: 'db_error', details: err.message });
     }
 });
 
@@ -489,7 +490,8 @@ app.post('/admin/import-data', requireAdmin, async (req, res) => {
         await db.importData(teams, candidates);
         res.json({ success: true });
     } catch (err) {
-        res.status(400).json({ error: 'invalid_json' });
+        console.error('Import error:', err);
+        res.status(500).json({ error: 'import_failed' });
     }
 });
 
