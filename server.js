@@ -122,6 +122,8 @@ app.get('/api/data', requireLogin, async (req, res) => {
         const contest = await db.getContestData();
         const isAdmin = req.session.user && req.session.user.role === 'admin';
         
+        const scoringMode = await db.getScoringMode();
+        
         res.setHeader('Cache-Control', 'no-store');
         res.json({
             users: users.map(u => ({ 
@@ -132,8 +134,24 @@ app.get('/api/data', requireLogin, async (req, res) => {
             })),
             teams: contest.teams || [],
             candidates: contest.candidates || [],
-            scores: contest.scores || []
+            scores: contest.scores || [],
+            scoringMode: scoringMode
         });
+    } catch (err) {
+        res.status(500).json({ error: 'db_error' });
+    }
+});
+
+// Cập nhật chế độ chấm điểm (Admin)
+app.post('/admin/set-scoring-mode', requireAdmin, async (req, res) => {
+    try {
+        const mode = req.body.mode;
+        if (['all', 'r1', 'r6', 'r7'].includes(mode)) {
+            await db.updateScoringMode(mode);
+            res.json({ success: true });
+        } else {
+            res.status(400).json({ error: 'invalid_mode' });
+        }
     } catch (err) {
         res.status(500).json({ error: 'db_error' });
     }

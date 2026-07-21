@@ -37,6 +37,14 @@ if (usePostgres) {
         data JSONB NOT NULL,
         created_at TIMESTAMP DEFAULT NOW()
     )`).catch(err => console.error('Auto-migration archived_rounds error:', err.message));
+
+    pool.query(`CREATE TABLE IF NOT EXISTS app_settings (
+        key VARCHAR(50) PRIMARY KEY,
+        value VARCHAR(255) NOT NULL
+    )`).then(() => {
+        // Initialize default scoring mode if not exists
+        return pool.query(`INSERT INTO app_settings (key, value) VALUES ('scoringMode', 'all') ON CONFLICT DO NOTHING`);
+    }).catch(err => console.error('Auto-migration app_settings error:', err.message));
 } else {
     console.log('Database Mode: LOCAL JSON');
 }
@@ -493,6 +501,30 @@ module.exports = {
             });
 
             writeJSON(contestFilePath, contest);
+        }
+    },
+
+    getScoringMode: async () => {
+        if (usePostgres) {
+            try {
+                const res = await pool.query("SELECT value FROM app_settings WHERE key = 'scoringMode'");
+                return res.rows.length > 0 ? res.rows[0].value : 'all';
+            } catch (err) {
+                return 'all';
+            }
+        } else {
+            const data = readJSON(contestFilePath, { teams: [], candidates: [], scores: [], scoringMode: 'all' });
+            return data.scoringMode || 'all';
+        }
+    },
+
+    updateScoringMode: async (mode) => {
+        if (usePostgres) {
+            await pool.query("INSERT INTO app_settings (key, value) VALUES ('scoringMode', $1) ON CONFLICT (key) DO UPDATE SET value = $1", [mode]);
+        } else {
+            const data = readJSON(contestFilePath, { teams: [], candidates: [], scores: [], scoringMode: 'all' });
+            data.scoringMode = mode;
+            writeJSON(contestFilePath, data);
         }
     }
 };

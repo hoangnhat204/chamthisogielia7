@@ -272,6 +272,18 @@
 
             <div class="section-card">
                 <h3>📊 Kết Quả Chấm Điểm & Xếp Hạng</h3>
+                
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid var(--glass-border);">
+                    <h4 style="margin-top: 0; margin-bottom: 0.5rem; color: #fff;">🎯 Chế Độ Chấm Thi Cho BGK</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem;">Chọn vòng thi mà Ban giám khảo được phép chấm. Khi bạn đổi, màn hình của BGK sẽ tự động ẩn các vòng khác.</p>
+                    <select id="admin-scoring-mode" onchange="updateScoringMode()" style="padding: 0.5rem; border-radius: 6px; border: 1px solid var(--glass-border); background: var(--bg-main); color: #fff; width: 100%; max-width: 300px;">
+                        <option value="all">Chấm Tất Cả Các Vòng</option>
+                        <option value="r1">Chỉ chấm Vòng 1 (Dạ Hội)</option>
+                        <option value="r6">Chỉ chấm Vòng 6 (Truyền Cảm Hứng)</option>
+                        <option value="r7">Chỉ chấm Vòng 7 (Ứng Xử)</option>
+                    </select>
+                </div>
+
                 <div style="display:flex;gap:0.8rem;flex-wrap:wrap;margin-bottom:1rem;">
                     <button class="btn-secondary" id="btn-toggle-admin-scores" onclick="toggleAdminScoreTable()"
                         style="padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;">🙈 Ẩn Bảng Điểm Chi
@@ -392,6 +404,11 @@
                 const res = await fetch('/api/data');
                 if (!res.ok) throw new Error('Không thể tải dữ liệu');
                 appData = await res.json();
+                
+                // Cập nhật giao diện dropdown
+                if (appData.scoringMode && document.getElementById('admin-scoring-mode')) {
+                    document.getElementById('admin-scoring-mode').value = appData.scoringMode;
+                }
 
                 renderUsers();
                 renderCandidates();
@@ -400,6 +417,27 @@
                 await loadArchivedRounds();
             } catch (err) {
                 console.error('Lỗi tải dữ liệu:', err);
+            }
+        }
+
+        async function updateScoringMode() {
+            const mode = document.getElementById('admin-scoring-mode').value;
+            try {
+                const res = await fetch('/admin/set-scoring-mode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    body: new URLSearchParams({ mode })
+                });
+                if (res.ok) {
+                    showAlert('Đã lưu chế độ chấm thi thành công!');
+                } else {
+                    showAlert('Lỗi khi lưu cấu hình', 'error');
+                }
+            } catch (e) {
+                showAlert('Lỗi mạng khi lưu', 'error');
             }
         }
 

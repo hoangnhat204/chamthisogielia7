@@ -391,64 +391,99 @@
             try {
                 const r = await fetch('/api/data');
                 if (r.ok) {
-                    appData = await r.json();
+                    const newData = await r.json();
+                    const modeChanged = appData.scoringMode && newData.scoringMode && appData.scoringMode !== newData.scoringMode;
+                    appData = newData;
+
+                    if (appData.scoringMode && appData.scoringMode !== 'all') {
+                        let newPhase = 1;
+                        if (appData.scoringMode === 'r6') newPhase = 2;
+                        if (appData.scoringMode === 'r7') newPhase = 3;
+                        
+                        if (currentRoundPhase !== newPhase || modeChanged) {
+                            currentRoundPhase = newPhase;
+                            if (modeChanged) {
+                                auto = true; 
+                                silent = false;
+                            }
+                        }
+                    }
+
                     if (!silent) {
                         if (auto) resumeProgress(); else renderWizard();
+                    } else if (modeChanged) {
+                        resumeProgress();
                     }
                 }
             } catch (e) { console.error('load error', e); }
         }
 
         function resumeProgress() {
+            const mode = appData.scoringMode || 'all';
+
             // Check phase 1
-            let cands1 = getPhaseCandidates(1);
-            for (let i = 0; i < cands1.length; i++) {
-                const s = appData.scores.find(v => v.candidateId === cands1[i].id && v.judge === currentUser.username);
-                if (!s || typeof s.aoDai === 'undefined') {
-                    currentRoundPhase = 1;
-                    currentCandidateIndex = i;
-                    renderWizard();
+            if (mode === 'all' || mode === 'r1') {
+                let cands1 = getPhaseCandidates(1);
+                for (let i = 0; i < cands1.length; i++) {
+                    const s = appData.scores.find(v => v.candidateId === cands1[i].id && v.judge === currentUser.username);
+                    if (!s || typeof s.aoDai === 'undefined') {
+                        currentRoundPhase = 1;
+                        currentCandidateIndex = i;
+                        renderWizard();
+                        return;
+                    }
+                }
+                if (mode === 'r1') {
+                    showCompletion(true, 1);
                     return;
                 }
             }
 
             // Check phase 2
-            let cands2 = getPhaseCandidates(2);
-            let hasAnyR2 = false;
-            for (let i = 0; i < cands2.length; i++) {
-                const s = appData.scores.find(v => v.candidateId === cands2[i].id && v.judge === currentUser.username);
-                if (s && typeof s.inspiration !== 'undefined') hasAnyR2 = true;
-                if (!s || typeof s.inspiration === 'undefined') {
-                    if (!hasAnyR2 && cands2.length > 0) {
-                        showCompletion(false, 1);
+            if (mode === 'all' || mode === 'r6') {
+                let cands2 = getPhaseCandidates(2);
+                let hasAnyR2 = false;
+                for (let i = 0; i < cands2.length; i++) {
+                    const s = appData.scores.find(v => v.candidateId === cands2[i].id && v.judge === currentUser.username);
+                    if (s && typeof s.inspiration !== 'undefined') hasAnyR2 = true;
+                    if (!s || typeof s.inspiration === 'undefined') {
+                        if (mode === 'all' && !hasAnyR2 && cands2.length > 0) {
+                            showCompletion(false, 1);
+                            return;
+                        }
+                        currentRoundPhase = 2;
+                        currentCandidateIndex = i;
+                        renderWizard();
                         return;
                     }
-                    currentRoundPhase = 2;
-                    currentCandidateIndex = i;
-                    renderWizard();
+                }
+                if (mode === 'r6') {
+                    showCompletion(true, 2);
                     return;
                 }
             }
 
             // Check phase 3
-            let cands3 = getPhaseCandidates(3);
-            let hasAnyR3 = false;
-            for (let i = 0; i < cands3.length; i++) {
-                const s = appData.scores.find(v => v.candidateId === cands3[i].id && v.judge === currentUser.username);
-                if (s && typeof s.ungXu !== 'undefined') hasAnyR3 = true;
-                if (!s || typeof s.ungXu === 'undefined') {
-                    if (!hasAnyR3 && cands3.length > 0) {
-                        showCompletion(false, 2);
+            if (mode === 'all' || mode === 'r7') {
+                let cands3 = getPhaseCandidates(3);
+                let hasAnyR3 = false;
+                for (let i = 0; i < cands3.length; i++) {
+                    const s = appData.scores.find(v => v.candidateId === cands3[i].id && v.judge === currentUser.username);
+                    if (s && typeof s.ungXu !== 'undefined') hasAnyR3 = true;
+                    if (!s || typeof s.ungXu === 'undefined') {
+                        if (mode === 'all' && !hasAnyR3 && cands3.length > 0) {
+                            showCompletion(false, 2);
+                            return;
+                        }
+                        currentRoundPhase = 3;
+                        currentCandidateIndex = i;
+                        renderWizard();
                         return;
                     }
-                    currentRoundPhase = 3;
-                    currentCandidateIndex = i;
-                    renderWizard();
-                    return;
                 }
             }
 
-            showCompletion(true, 3);
+            showCompletion(true, mode === 'all' ? 3 : (mode === 'r6' ? 2 : (mode === 'r1' ? 1 : 3)));
         }
 
         function startNextPhase(phase) {
@@ -614,7 +649,9 @@
             const nextBtn = document.getElementById('next-round-container');
             const btnEl = document.getElementById('btn-next-phase');
             if (nextBtn && btnEl) {
-                if (phaseDone === 1 && getPhaseCandidates(2).length > 0) {
+                if (appData.scoringMode && appData.scoringMode !== 'all') {
+                    nextBtn.style.display = 'none';
+                } else if (phaseDone === 1 && getPhaseCandidates(2).length > 0) {
                     nextBtn.style.display = 'block';
                     btnEl.textContent = 'Tiếp Tục Chấm Vòng 6 🚀';
                     btnEl.onclick = () => startNextPhase(2);
