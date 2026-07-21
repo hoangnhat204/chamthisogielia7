@@ -440,34 +440,16 @@
                         const cand = appData.candidates.find(c => c.id === candId) || { name: 'Thí sinh (đã xóa)' };
                         const candScores = grouped[candId];
                         const details = candScores.map(s => {
-                            let r1Text = `Áo dài ${s.aoDai || 0}`;
-                            if (s.details && s.details.r1) {
-                                r1Text += ` [${s.details.r1.join(' + ')}]`;
-                            }
-                            let r2Text = `Truyền cảm hứng ${s.inspiration || 0}`;
-                            if (s.details && s.details.r2) {
-                                r2Text += ` [${s.details.r2.join(' + ')}]`;
-                            }
-                            return `<span class="badge badge-judge">${s.judge}</span>: ${r1Text} | ${r2Text}`;
+                            let r1Text = `Dạ hội: ${s.aoDai !== null && typeof s.aoDai !== 'undefined' ? s.aoDai.toFixed(1) : '-'}`;
+                            let r2Text = `Truyền cảm hứng: ${s.inspiration !== null && typeof s.inspiration !== 'undefined' ? s.inspiration.toFixed(1) : '-'}`;
+                            let r3Text = `Ứng xử: ${s.ungXu !== null && typeof s.ungXu !== 'undefined' ? s.ungXu.toFixed(1) : '-'}`;
+                            return `<span class="badge badge-judge">${s.judge}</span>: ${r1Text} | ${r2Text} | ${r3Text}`;
                         }).join(' <br/> ');
+                        
                         scoreHTML += `<li class="action-item" style="display:block; margin-bottom: 0.5rem;">
                             <strong>${cand.name}</strong>
-                            <div style="font-size:0.85rem; margin-top:0.2rem;">${details}</div>
-                        candScores.forEach(s => {
-                            const r1Text = s.aoDai !== null && typeof s.aoDai !== 'undefined' ? s.aoDai.toFixed(1) + 'đ' : '<span style="color:var(--text-muted);">-</span>';
-                            const r2Text = s.inspiration !== null && typeof s.inspiration !== 'undefined' ? s.inspiration.toFixed(1) + 'đ' : '<span style="color:var(--text-muted);">-</span>';
-                            const r3Text = s.ungXu !== null && typeof s.ungXu !== 'undefined' ? s.ungXu.toFixed(1) + 'đ' : '<span style="color:var(--text-muted);">-</span>';
-                            scoreHTML += `
-                                <li class="action-item" style="display:block; margin-bottom: 0.5rem;">
-                                    <strong>${cand.name}</strong>
-                                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 0.5rem 0;">
-                                        <span><strong style="color:var(--accent-blue);">${s.judge}</strong></span>
-                                        <span style="font-size:0.9rem;">
-                                            V1: ${r1Text} | V6: ${r2Text} | V7: ${r3Text}
-                                        </span>
-                                    </div>
-                                </li>`;
-                        });
+                            <div style="font-size:0.85rem; margin-top:0.2rem; line-height: 1.6;">${details}</div>
+                        </li>`;
                     }
                 } else {
                     scoreHTML += '<li class="action-item">Không có điểm</li>';
