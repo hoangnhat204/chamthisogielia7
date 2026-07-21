@@ -35,6 +35,7 @@ CREATE TABLE candidates (
     name VARCHAR(255) NOT NULL,
     sbd VARCHAR(50) DEFAULT '',
     kahoot NUMERIC(4,2) DEFAULT 0,
+    selected_r7 BOOLEAN DEFAULT FALSE,
     team_id VARCHAR(100) REFERENCES teams(id) ON DELETE CASCADE
 );
 
@@ -44,13 +45,14 @@ CREATE TABLE scores (
     candidate_id VARCHAR(100) REFERENCES candidates(id) ON DELETE CASCADE,
     ao_dai NUMERIC(4, 2) NULL,
     inspiration NUMERIC(4, 2) NULL,
+    ung_xu NUMERIC(4, 2) NULL,
     details JSONB DEFAULT '{}'::jsonb,
     CONSTRAINT unique_judge_candidate UNIQUE (judge, candidate_id)
 );
 
 -- 3. Insert initial Users
 INSERT INTO users (username, password, role) VALUES
-('admin', '1', 'admin'),
+('admin', 'matkhaula1', 'admin'),
 ('user', '1', 'user'),
 ('BGK_1', '1', 'judge');
 
