@@ -698,6 +698,7 @@
                 const modes = (appData.scoringMode || 'all').split(',');
                 const allowR6 = modes.includes('all') || modes.includes('r6');
                 const allowR7 = modes.includes('all') || modes.includes('r7');
+                const allowR4 = modes.includes('all') || modes.includes('rThuThach');
 
                 if (phaseDone === 1 && allowR6 && getPhaseCandidates(2).length > 0) {
                     nextBtn.style.display = 'block';
