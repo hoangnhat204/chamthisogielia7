@@ -68,13 +68,8 @@ const requireJudge = (req, res, next) => {
 
 // Route hiển thị form đăng nhập
 app.get('/login', (req, res) => {
-    if (req.session.user) {
-        if (req.session.user.role === 'admin') {
-            return res.redirect('/admin');
-        } else if (req.session.user.role === 'judge') {
-            return res.redirect('/judge');
-        }
-    }
+    // Đã vào trang login thì tự động đăng xuất luôn để tránh việc bị đăng nhập tự động
+    req.session = null;
     res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
 
