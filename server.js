@@ -55,9 +55,9 @@ const requireAdmin = (req, res, next) => {
     }
 };
 
-// Middleware kiểm tra quyền giám khảo (cho phép admin truy cập để test)
+// Middleware kiểm tra quyền giám khảo
 const requireJudge = (req, res, next) => {
-    if (req.session.user && (req.session.user.role === 'judge' || req.session.user.role === 'admin')) {
+    if (req.session.user && req.session.user.role === 'judge') {
         next();
     } else if (!req.session.user) {
         res.redirect('/login');
@@ -150,8 +150,8 @@ app.get('/admin', requireAdmin, (req, res) => {
 });
 
 app.get('/judge', requireLogin, (req, res) => {
-    // Chỉ cho phép truy cập nếu là giám khảo hoặc admin
-    if (req.session.user.role === 'judge' || req.session.user.role === 'admin') {
+    // Chỉ cho phép truy cập nếu là giám khảo
+    if (req.session.user.role === 'judge') {
         res.sendFile(path.join(__dirname, 'views', 'judge.html'));
     } else {
         res.status(403).send('Chỉ Ban giám khảo mới có quyền truy cập trang này.');
