@@ -80,7 +80,8 @@ app.get('/login', (req, res) => {
 
 // Xử lý đăng nhập
 app.post('/login', async (req, res) => {
-    const { username, password } = req.body;
+    const username = (req.body.username || '').trim();
+    const password = req.body.password;
     try {
         const users = await db.getUsers();
         const user = users.find(u => u.username === username && u.password === password);
@@ -165,7 +166,9 @@ app.get('/judge', requireLogin, (req, res) => {
 // Xử lý tạo tài khoản mới (Hỗ trợ cả form submit truyền thống và AJAX)
 app.post('/admin/add-user', requireAdmin, async (req, res) => {
     console.log('ADD-USER called with body:', req.body);
-    const { username, password, role } = req.body;
+    const username = (req.body.username || '').trim();
+    const password = req.body.password;
+    const role = req.body.role;
     try {
         if (role === 'admin') {
             if (req.headers['accept'] && req.headers['accept'].includes('application/json')) {
