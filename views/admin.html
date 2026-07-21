@@ -275,13 +275,21 @@
                 
                 <div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid var(--glass-border);">
                     <h4 style="margin-top: 0; margin-bottom: 0.5rem; color: #fff;">🎯 Chế Độ Chấm Thi Cho BGK</h4>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem;">Chọn vòng thi mà Ban giám khảo được phép chấm. Khi bạn đổi, màn hình của BGK sẽ tự động ẩn các vòng khác.</p>
-                    <select id="admin-scoring-mode" onchange="updateScoringMode()" style="padding: 0.5rem; border-radius: 6px; border: 1px solid var(--glass-border); background: var(--bg-main); color: #fff; width: 100%; max-width: 300px;">
-                        <option value="all">Chấm Tất Cả Các Vòng</option>
-                        <option value="r1">Chỉ chấm Vòng 1 (Dạ Hội)</option>
-                        <option value="r6">Chỉ chấm Vòng 6 (Truyền Cảm Hứng)</option>
-                        <option value="r7">Chỉ chấm Vòng 7 (Ứng Xử)</option>
-                    </select>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem;">Đánh dấu (tick) vào các vòng thi mà Ban giám khảo được phép chấm. Khi bạn đổi, màn hình của BGK sẽ tự động điều chỉnh.</p>
+                    <div style="display: flex; gap: 1.5rem; align-items: center; background: var(--bg-main); padding: 0.8rem; border-radius: 6px; border: 1px solid var(--glass-border); flex-wrap: wrap;">
+                        <label style="color: #fff; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" value="all" id="cb-mode-all" onchange="toggleAllScoringModes()"> <strong>Tất Cả</strong>
+                        </label>
+                        <label style="color: #fff; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" value="r1" class="admin-scoring-cb" onchange="updateScoringMode()"> Vòng 1 (Dạ Hội)
+                        </label>
+                        <label style="color: #fff; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" value="r6" class="admin-scoring-cb" onchange="updateScoringMode()"> Vòng 6 (Truyền Cảm Hứng)
+                        </label>
+                        <label style="color: #fff; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" value="r7" class="admin-scoring-cb" onchange="updateScoringMode()"> Vòng 7 (Ứng Xử)
+                        </label>
+                    </div>
                 </div>
 
                 <div style="display:flex;gap:0.8rem;flex-wrap:wrap;margin-bottom:1rem;">
@@ -405,9 +413,20 @@
                 if (!res.ok) throw new Error('Không thể tải dữ liệu');
                 appData = await res.json();
                 
-                // Cập nhật giao diện dropdown
-                if (appData.scoringMode && document.getElementById('admin-scoring-mode')) {
-                    document.getElementById('admin-scoring-mode').value = appData.scoringMode;
+                // Cập nhật giao diện checkboxes
+                if (appData.scoringMode !== undefined) {
+                    const modes = appData.scoringMode.split(',');
+                    const cbs = document.querySelectorAll('.admin-scoring-cb');
+                    const cbAll = document.getElementById('cb-mode-all');
+                    if (modes.includes('all')) {
+                        cbs.forEach(cb => cb.checked = true);
+                        cbAll.checked = true;
+                    } else {
+                        cbs.forEach(cb => {
+                            cb.checked = modes.includes(cb.value);
+                        });
+                        cbAll.checked = Array.from(cbs).every(cb => cb.checked);
+                    }
                 }
 
                 renderUsers();
@@ -420,8 +439,29 @@
             }
         }
 
+        function toggleAllScoringModes() {
+            const cbAll = document.getElementById('cb-mode-all');
+            const cbs = document.querySelectorAll('.admin-scoring-cb');
+            cbs.forEach(cb => cb.checked = cbAll.checked);
+            updateScoringMode();
+        }
+
         async function updateScoringMode() {
-            const mode = document.getElementById('admin-scoring-mode').value;
+            const cbs = document.querySelectorAll('.admin-scoring-cb');
+            const cbAll = document.getElementById('cb-mode-all');
+            
+            const selected = Array.from(cbs).filter(cb => cb.checked).map(cb => cb.value);
+            let mode = 'none';
+            if (selected.length === cbs.length) {
+                mode = 'all';
+                cbAll.checked = true;
+            } else if (selected.length > 0) {
+                mode = selected.join(',');
+                cbAll.checked = false;
+            } else {
+                cbAll.checked = false;
+            }
+
             try {
                 const res = await fetch('/admin/set-scoring-mode', {
                     method: 'POST',

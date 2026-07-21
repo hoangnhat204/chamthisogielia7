@@ -145,8 +145,10 @@ app.get('/api/data', requireLogin, async (req, res) => {
 // Cập nhật chế độ chấm điểm (Admin)
 app.post('/admin/set-scoring-mode', requireAdmin, async (req, res) => {
     try {
-        const mode = req.body.mode;
-        if (['all', 'r1', 'r6', 'r7'].includes(mode)) {
+        const mode = req.body.mode || '';
+        const validTokens = ['all', 'r1', 'r6', 'r7', 'none'];
+        const isValid = mode.split(',').every(t => validTokens.includes(t.trim()));
+        if (isValid) {
             await db.updateScoringMode(mode);
             res.json({ success: true });
         } else {

@@ -420,9 +420,14 @@
 
         function resumeProgress() {
             const mode = appData.scoringMode || 'all';
+            const modes = mode.split(',');
+
+            const allowR1 = modes.includes('all') || modes.includes('r1');
+            const allowR6 = modes.includes('all') || modes.includes('r6');
+            const allowR7 = modes.includes('all') || modes.includes('r7');
 
             // Check phase 1
-            if (mode === 'all' || mode === 'r1') {
+            if (allowR1) {
                 let cands1 = getPhaseCandidates(1);
                 for (let i = 0; i < cands1.length; i++) {
                     const s = appData.scores.find(v => v.candidateId === cands1[i].id && v.judge === currentUser.username);
@@ -433,21 +438,21 @@
                         return;
                     }
                 }
-                if (mode === 'r1') {
+                if (!allowR6 && !allowR7) {
                     showCompletion(true, 1);
                     return;
                 }
             }
 
             // Check phase 2
-            if (mode === 'all' || mode === 'r6') {
+            if (allowR6) {
                 let cands2 = getPhaseCandidates(2);
                 let hasAnyR2 = false;
                 for (let i = 0; i < cands2.length; i++) {
                     const s = appData.scores.find(v => v.candidateId === cands2[i].id && v.judge === currentUser.username);
                     if (s && typeof s.inspiration !== 'undefined') hasAnyR2 = true;
                     if (!s || typeof s.inspiration === 'undefined') {
-                        if (mode === 'all' && !hasAnyR2 && cands2.length > 0) {
+                        if (allowR1 && !hasAnyR2 && cands2.length > 0) {
                             showCompletion(false, 1);
                             return;
                         }
@@ -457,21 +462,21 @@
                         return;
                     }
                 }
-                if (mode === 'r6') {
+                if (!allowR7) {
                     showCompletion(true, 2);
                     return;
                 }
             }
 
             // Check phase 3
-            if (mode === 'all' || mode === 'r7') {
+            if (allowR7) {
                 let cands3 = getPhaseCandidates(3);
                 let hasAnyR3 = false;
                 for (let i = 0; i < cands3.length; i++) {
                     const s = appData.scores.find(v => v.candidateId === cands3[i].id && v.judge === currentUser.username);
                     if (s && typeof s.ungXu !== 'undefined') hasAnyR3 = true;
                     if (!s || typeof s.ungXu === 'undefined') {
-                        if (mode === 'all' && !hasAnyR3 && cands3.length > 0) {
+                        if ((allowR1 || allowR6) && !hasAnyR3 && cands3.length > 0) {
                             showCompletion(false, 2);
                             return;
                         }
@@ -483,7 +488,11 @@
                 }
             }
 
-            showCompletion(true, mode === 'all' ? 3 : (mode === 'r6' ? 2 : (mode === 'r1' ? 1 : 3)));
+            if (!allowR1 && !allowR6 && !allowR7) {
+                showCompletion(true, 0); // none allowed
+            } else {
+                showCompletion(true, allowR7 ? 3 : (allowR6 ? 2 : 1));
+            }
         }
 
         function startNextPhase(phase) {
@@ -649,13 +658,15 @@
             const nextBtn = document.getElementById('next-round-container');
             const btnEl = document.getElementById('btn-next-phase');
             if (nextBtn && btnEl) {
-                if (appData.scoringMode && appData.scoringMode !== 'all') {
-                    nextBtn.style.display = 'none';
-                } else if (phaseDone === 1 && getPhaseCandidates(2).length > 0) {
+                const modes = (appData.scoringMode || 'all').split(',');
+                const allowR6 = modes.includes('all') || modes.includes('r6');
+                const allowR7 = modes.includes('all') || modes.includes('r7');
+
+                if (phaseDone === 1 && allowR6 && getPhaseCandidates(2).length > 0) {
                     nextBtn.style.display = 'block';
                     btnEl.textContent = 'Tiếp Tục Chấm Vòng 6 🚀';
                     btnEl.onclick = () => startNextPhase(2);
-                } else if (phaseDone === 2 && getPhaseCandidates(3).length > 0) {
+                } else if (phaseDone === 2 && allowR7 && getPhaseCandidates(3).length > 0) {
                     nextBtn.style.display = 'block';
                     btnEl.textContent = 'Tiếp Tục Chấm Vòng 7 🚀';
                     btnEl.onclick = () => startNextPhase(3);
@@ -664,7 +675,10 @@
                 }
             }
 
-            if (phaseDone === 1) {
+            if (phaseDone === 0) {
+                document.getElementById('completion-title').textContent = 'Chưa Có Vòng Thi Nào Được Mở';
+                document.getElementById('completion-desc').textContent = 'Admin chưa mở quyền chấm điểm cho bất kỳ vòng thi nào. Vui lòng chờ!';
+            } else if (phaseDone === 1) {
                 document.getElementById('completion-title').textContent = 'Hoàn Thành Vòng 1';
                 document.getElementById('completion-desc').textContent = 'Bạn đã chấm xong Vòng 1. Dưới đây là bảng điểm hiện tại. Hãy bấm nút bên dưới để chuyển sang Vòng 6.';
             } else if (phaseDone === 2) {
