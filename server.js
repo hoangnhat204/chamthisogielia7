@@ -390,7 +390,19 @@ app.post('/admin/update-kahoot', requireAdmin, async (req, res) => {
     }
 });
 
-// Ban giám khảo chấm điểm / cập nhật điểm thí sinh (Bán kết: Áo dài, Truyền cảm hứng)
+// Toggle quyền thi Vòng 7
+app.post('/admin/toggle-r7', requireAdmin, async (req, res) => {
+    const { candidateId, selected } = req.body;
+    if (!candidateId) return res.status(400).json({ error: 'missing_id' });
+    try {
+        await db.toggleCandidateR7(candidateId, selected === 'true');
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'db_error' });
+    }
+});
+
+// Xử lý điểm (Giám khảo) chấm điểm / cập nhật điểm thí sinh (Bán kết: Áo dài, Truyền cảm hứng)
 app.post('/judge/score', requireJudge, async (req, res) => {
     const { candidateId, aoDai, inspiration, ungXu, detailsR1, detailsR2, detailsR3 } = req.body;
     if (!candidateId) {

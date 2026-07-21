@@ -270,6 +270,19 @@ module.exports = {
         }
     },
 
+    toggleCandidateR7: async (candidateId, selected) => {
+        if (usePostgres) {
+            await pool.query('UPDATE candidates SET selected_r7 = $1 WHERE id = $2', [selected, candidateId]);
+        } else {
+            const contest = readJSON(contestFilePath, { teams: [], candidates: [], scores: [] });
+            const cand = contest.candidates.find(c => c.id === candidateId);
+            if (cand) {
+                cand.selectedForR7 = selected;
+                writeJSON(contestFilePath, contest);
+            }
+        }
+    },
+
     saveScore: async (judge, candidateId, aoDai, inspiration, ungXu, detailsR1, detailsR2, detailsR3) => {
         if (usePostgres) {
             const existing = await pool.query('SELECT * FROM scores WHERE judge = $1 AND candidate_id = $2', [judge, candidateId]);
