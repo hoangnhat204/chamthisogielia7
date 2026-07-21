@@ -167,6 +167,13 @@ app.post('/admin/add-user', requireAdmin, async (req, res) => {
     console.log('ADD-USER called with body:', req.body);
     const { username, password, role } = req.body;
     try {
+        if (role === 'admin') {
+            if (req.headers['accept'] && req.headers['accept'].includes('application/json')) {
+                return res.status(400).json({ error: 'cannot_create_admin' });
+            }
+            return res.redirect('/admin?msg=cannot_create_admin');
+        }
+
         const users = await db.getUsers();
         if (users.find(u => u.username === username)) {
             if (req.headers['accept'] && req.headers['accept'].includes('application/json')) {
