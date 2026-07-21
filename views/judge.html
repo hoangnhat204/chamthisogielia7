@@ -78,9 +78,9 @@
 
         .score-buttons-grid {
             display: flex;
-            flex-wrap: nowrap;
-            justify-content: space-between;
-            gap: 0.2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
             width: 100%;
         }
 
@@ -88,14 +88,14 @@
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--glass-border);
             color: var(--text-main);
-            padding: 0.4rem 0;
+            padding: 0.5rem 1rem;
             border-radius: 6px;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
             text-align: center;
-            flex: 1;
+            min-width: 48px;
             position: relative;
             z-index: 1;
         }
@@ -576,13 +576,18 @@
             const container = document.getElementById('criteria-container');
             let html = '';
             criteriaList.forEach((crit, index) => {
-                html += `<div class="score-section">
-                    <div class="section-title" style="text-align:left; font-size: 0.95rem; margin-bottom: 0.5rem;">${index + 1}. ${crit.name}</div>
-                    <div class="score-buttons-grid" id="crit-btns-${index}">`;
+                html += `<div class="score-section">`;
+                
+                if (currentRoundPhase !== 4) {
+                    html += `<div class="section-title" style="text-align:left; font-size: 0.95rem; margin-bottom: 0.5rem;">${index + 1}. ${crit.name}</div>`;
+                }
+
+                html += `<div class="score-buttons-grid" id="crit-btns-${index}">`;
 
                 let val = crit.min !== undefined ? crit.min : 0;
-                while (val <= crit.max) {
-                    html += `<div class="score-btn" onclick="selectCriterion(${index}, ${val})">${val.toFixed(1)}</div>`;
+                while (val <= crit.max + 0.001) {
+                    let cleanVal = Math.round(val * 10) / 10;
+                    html += `<div class="score-btn" onclick="selectCriterion(${index}, ${cleanVal})">${cleanVal.toFixed(1)}</div>`;
                     val += crit.step;
                 }
                 html += `</div></div>`;
