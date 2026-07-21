@@ -52,9 +52,7 @@ CREATE TABLE scores (
 
 -- 3. Insert initial Users
 INSERT INTO users (username, password, role) VALUES
-('admin', 'matkhaula1', 'admin'),
-('user', '1', 'user'),
-('BGK_1', '1', 'judge');
+('admin', 'matkhaula1', 'admin');
 
 -- 4. Insert initial Teams
 INSERT INTO teams (id, name, mentors) VALUES
