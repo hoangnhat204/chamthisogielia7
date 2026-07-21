@@ -303,7 +303,7 @@ module.exports = {
             )`);
             const scoresData = await pool.query('SELECT * FROM scores');
             const dataToArchive = { scores: scoresData.rows };
-            await pool.query('INSERT INTO archived_rounds (name, data) VALUES ($1, $2)', [roundName, dataToArchive]);
+            await pool.query('INSERT INTO archived_rounds (name, data) VALUES ($1, $2)', [roundName, JSON.stringify(dataToArchive)]);
             await pool.query('DELETE FROM scores');
         } else {
             const contest = readJSON(contestFilePath, { teams: [], candidates: [], scores: [], archivedRounds: [] });
@@ -311,7 +311,7 @@ module.exports = {
             contest.archivedRounds.push({
                 id: 'round_' + Date.now(),
                 name: roundName,
-                scores: [...contest.scores],
+                scores: [...(contest.scores || [])],
                 createdAt: new Date().toISOString()
             });
             contest.scores = [];

@@ -298,6 +298,7 @@ app.post('/admin/archive-round', requireAdmin, async (req, res) => {
         await db.archiveCurrentRound(roundName);
         res.json({ success: true });
     } catch (err) {
+        console.error('Error archiving round:', err);
         res.status(500).json({ error: 'db_error' });
     }
 });

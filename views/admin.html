@@ -439,12 +439,15 @@
                 scoreHTML += '</ul>';
 
                 const createdDate = new Date(arc.created_at || arc.createdAt).toLocaleString('vi-VN');
+                const detailsId = 'history-details-' + (arc.id || Date.now() + Math.random());
                 block.innerHTML = `
-                    <div class="mentor-block-title">
-                        <span>💾 Vòng: <strong style="color:var(--accent-blue);">${arc.name}</strong></span>
+                    <div class="mentor-block-title" style="cursor: pointer;" onclick="const el = document.getElementById('${detailsId}'); el.style.display = el.style.display === 'none' ? 'block' : 'none';">
+                        <span>💾 Vòng: <strong style="color:var(--accent-blue);">${arc.name}</strong> <small style="color:var(--text-muted); margin-left:8px; font-weight:normal;">(Bấm để xem/ẩn)</small></span>
                         <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">${createdDate}</span>
                     </div>
-                    ${scoreHTML}
+                    <div id="${detailsId}" style="display: none; padding-top: 1rem;">
+                        ${scoreHTML}
+                    </div>
                 `;
                 container.appendChild(block);
             });
