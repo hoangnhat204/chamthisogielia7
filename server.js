@@ -81,10 +81,10 @@ app.get('/login', (req, res) => {
 // Xử lý đăng nhập
 app.post('/login', async (req, res) => {
     const username = (req.body.username || '').trim();
-    const password = req.body.password;
+    const password = (req.body.password || '').trim();
     try {
         const users = await db.getUsers();
-        const user = users.find(u => u.username === username && u.password === password);
+        const user = users.find(u => (u.username || '').trim() === username && (u.password || '').trim() === password);
         
         if (user) {
             if (user.status === 'inactive') {
@@ -167,7 +167,7 @@ app.get('/judge', requireLogin, (req, res) => {
 app.post('/admin/add-user', requireAdmin, async (req, res) => {
     console.log('ADD-USER called with body:', req.body);
     const username = (req.body.username || '').trim();
-    const password = req.body.password;
+    const password = (req.body.password || '').trim();
     const role = req.body.role;
     try {
         if (role === 'admin') {
@@ -220,10 +220,11 @@ app.post('/admin/toggle-user-status', requireAdmin, async (req, res) => {
 
 // Cập nhật mật khẩu tài khoản
 app.post('/admin/update-user-password', requireAdmin, async (req, res) => {
-    const { username, newPassword } = req.body;
+    const username = (req.body.username || '').trim();
+    const newPassword = (req.body.newPassword || '').trim();
     try {
         const users = await db.getUsers();
-        if (!users.find(u => u.username === username)) {
+        if (!users.find(u => (u.username || '').trim() === username)) {
             return res.status(404).json({ error: 'not_found' });
         }
         await db.updateUserPassword(username, newPassword);
