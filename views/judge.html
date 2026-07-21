@@ -303,6 +303,7 @@
                                         <th style="text-align:center;width:120px;">Dạ Hội (V1)</th>
                                         <th style="text-align:center;width:140px;">Truyền Cảm Hứng (V6)</th>
                                         <th style="text-align:center;width:120px;">Ứng Xử (V7)</th>
+                                        <th style="text-align:center;width:120px;">Thử Thách</th>
                                     </tr>
                                 </thead>
                                 <tbody id="summary-table-body"></tbody>
@@ -326,7 +327,7 @@
         let currentUser = null;
         let appData = { users: [], teams: [], candidates: [], scores: [] };
         let currentCandidateIndex = 0;
-        let currentRoundPhase = 1; // 1 = Vòng 1 (Dạ Hội), 2 = Vòng 6 (Truyền Cảm Hứng), 3 = Vòng 7 (Ứng Xử)
+        let currentRoundPhase = 1; // 1 = Vòng 1 (Dạ Hội), 2 = Vòng 6 (Truyền Cảm Hứng), 3 = Vòng 7 (Ứng Xử), 4 = Vòng Thử Thách
         let selectedCriteria = [];
 
         const criteriaR1 = [
@@ -346,6 +347,10 @@
         const criteriaR3 = [
             { name: "Nội dung trả lời trọng tâm", max: 5.0, step: 0.5 },
             { name: "Phong thái, tự tin, bản lĩnh", max: 5.0, step: 0.5 }
+        ];
+
+        const criteriaR4 = [
+            { name: "Điểm Thử Thách", min: 6.0, max: 10.0, step: 0.5 }
         ];
 
         function getPhaseCandidates(phase) {
@@ -399,6 +404,7 @@
                         let newPhase = 1;
                         if (appData.scoringMode === 'r6') newPhase = 2;
                         if (appData.scoringMode === 'r7') newPhase = 3;
+                        if (appData.scoringMode === 'rThuThach') newPhase = 4;
                         
                         if (currentRoundPhase !== newPhase || modeChanged) {
                             currentRoundPhase = newPhase;
@@ -425,6 +431,7 @@
             const allowR1 = modes.includes('all') || modes.includes('r1');
             const allowR6 = modes.includes('all') || modes.includes('r6');
             const allowR7 = modes.includes('all') || modes.includes('r7');
+            const allowR4 = modes.includes('all') || modes.includes('rThuThach');
 
             // Check phase 1
             if (allowR1) {
@@ -438,7 +445,7 @@
                         return;
                     }
                 }
-                if (!allowR6 && !allowR7) {
+                if (!allowR6 && !allowR7 && !allowR4) {
                     showCompletion(true, 1);
                     return;
                 }
@@ -462,7 +469,7 @@
                         return;
                     }
                 }
-                if (!allowR7) {
+                if (!allowR7 && !allowR4) {
                     showCompletion(true, 2);
                     return;
                 }
@@ -488,10 +495,36 @@
                 }
             }
 
-            if (!allowR1 && !allowR6 && !allowR7) {
+                if (!allowR4) {
+                    showCompletion(true, 3);
+                    return;
+                }
+            }
+
+            // Check phase 4
+            if (allowR4) {
+                let cands4 = getPhaseCandidates(4);
+                let hasAnyR4 = false;
+                for (let i = 0; i < cands4.length; i++) {
+                    const s = appData.scores.find(v => v.candidateId === cands4[i].id && v.judge === currentUser.username);
+                    if (s && typeof s.thuThach !== 'undefined') hasAnyR4 = true;
+                    if (!s || typeof s.thuThach === 'undefined') {
+                        if ((allowR1 || allowR6 || allowR7) && !hasAnyR4 && cands4.length > 0) {
+                            showCompletion(false, 3);
+                            return;
+                        }
+                        currentRoundPhase = 4;
+                        currentCandidateIndex = i;
+                        renderWizard();
+                        return;
+                    }
+                }
+            }
+
+            if (!allowR1 && !allowR6 && !allowR7 && !allowR4) {
                 showCompletion(true, 0); // none allowed
             } else {
-                showCompletion(true, allowR7 ? 3 : (allowR6 ? 2 : 1));
+                showCompletion(true, allowR4 ? 4 : (allowR7 ? 3 : (allowR6 ? 2 : 1)));
             }
         }
 
@@ -507,7 +540,7 @@
             const candidates = getPhaseCandidates(currentRoundPhase);
 
             if (candidates.length === 0) {
-                w.innerHTML = `<p style="text-align:center;font-style:italic;">Không có thí sinh nào tham gia vòng ${currentRoundPhase === 1 ? 'Dạ Hội' : currentRoundPhase === 2 ? 'Truyền Cảm Hứng' : 'Ứng Xử'}.</p>`;
+                w.innerHTML = `<p style="text-align:center;font-style:italic;">Không có thí sinh nào tham gia vòng ${currentRoundPhase === 1 ? 'Dạ Hội' : currentRoundPhase === 2 ? 'Truyền Cảm Hứng' : currentRoundPhase === 3 ? 'Ứng Xử' : 'Thử Thách'}.</p>`;
                 return;
             }
 
@@ -518,13 +551,13 @@
 
             const total = candidates.length;
             const step = currentCandidateIndex + 1;
-            const roundNum = currentRoundPhase === 1 ? 1 : (currentRoundPhase === 2 ? 6 : 7);
+            const roundNum = currentRoundPhase === 1 ? 1 : (currentRoundPhase === 2 ? 6 : (currentRoundPhase === 3 ? 7 : 'Thử Thách'));
 
             document.getElementById('step-indicator-text').textContent = `Thí sinh ${step} / ${total} - Vòng ${roundNum}`;
             document.getElementById('progress-bar-fill').style.width = `${step === 1 ? 5 : ((step - 1) / total) * 100}%`;
 
-            const activeCriteria = currentRoundPhase === 1 ? criteriaR1 : (currentRoundPhase === 2 ? criteriaR2 : criteriaR3);
-            document.getElementById('round-badge-text').textContent = currentRoundPhase === 1 ? "Vòng 1: Dạ Hội" : (currentRoundPhase === 2 ? "Vòng 6: Truyền Cảm Hứng" : "Vòng 7: Ứng Xử");
+            const activeCriteria = currentRoundPhase === 1 ? criteriaR1 : (currentRoundPhase === 2 ? criteriaR2 : (currentRoundPhase === 3 ? criteriaR3 : criteriaR4));
+            document.getElementById('round-badge-text').textContent = currentRoundPhase === 1 ? "Vòng 1: Dạ Hội" : (currentRoundPhase === 2 ? "Vòng 6: Truyền Cảm Hứng" : (currentRoundPhase === 3 ? "Vòng 7: Ứng Xử" : "Vòng Thử Thách"));
 
             const themeText = document.getElementById('round-theme-text');
             if (themeText) {
@@ -547,7 +580,7 @@
                     <div class="section-title" style="text-align:left; font-size: 0.95rem; margin-bottom: 0.5rem;">${index + 1}. ${crit.name}</div>
                     <div class="score-buttons-grid" id="crit-btns-${index}">`;
 
-                let val = 0;
+                let val = crit.min !== undefined ? crit.min : 0;
                 while (val <= crit.max) {
                     html += `<div class="score-btn" onclick="selectCriterion(${index}, ${val})">${val.toFixed(1)}</div>`;
                     val += crit.step;
@@ -606,9 +639,11 @@
             } else if (currentRoundPhase === 2) {
                 body.inspiration = totalScore;
                 body.detailsR2 = JSON.stringify(selectedCriteria);
-            } else {
+            } else if (currentRoundPhase === 3) {
                 body.ungXu = totalScore;
                 body.detailsR3 = JSON.stringify(selectedCriteria);
+            } else {
+                body.thuThach = totalScore;
             }
 
             try {
@@ -628,8 +663,11 @@
                         } else if (currentRoundPhase === 2) {
                             showCompletion(false, 2);
                             showAlert('🎉 Đã chấm xong Vòng Truyền Cảm Hứng!');
+                        } else if (currentRoundPhase === 3) {
+                            showCompletion(false, 3);
+                            showAlert('🎉 Đã chấm xong Vòng Ứng Xử!');
                         } else {
-                            showCompletion(true, 3);
+                            showCompletion(true, 4);
                             showAlert('🎉 Đã hoàn thành chấm điểm tất cả các vòng!');
                         }
                     } else {
@@ -670,6 +708,10 @@
                     nextBtn.style.display = 'block';
                     btnEl.textContent = 'Tiếp Tục Chấm Vòng 7 🚀';
                     btnEl.onclick = () => startNextPhase(3);
+                } else if (phaseDone === 3 && allowR4 && getPhaseCandidates(4).length > 0) {
+                    nextBtn.style.display = 'block';
+                    btnEl.textContent = 'Tiếp Tục Chấm Vòng Thử Thách 🚀';
+                    btnEl.onclick = () => startNextPhase(4);
                 } else {
                     nextBtn.style.display = 'none';
                 }
@@ -684,6 +726,12 @@
             } else if (phaseDone === 2) {
                 document.getElementById('completion-title').textContent = 'Hoàn Thành Vòng 6';
                 document.getElementById('completion-desc').textContent = 'Bạn đã chấm xong Vòng 6. Dưới đây là bảng điểm hiện tại. Hãy bấm nút bên dưới để chuyển sang Vòng 7.';
+            } else if (phaseDone === 3) {
+                document.getElementById('completion-title').textContent = 'Hoàn Thành Vòng 7';
+                document.getElementById('completion-desc').textContent = 'Bạn đã chấm xong Vòng 7. Dưới đây là bảng điểm hiện tại. Hãy bấm nút bên dưới để chuyển sang Vòng Thử Thách.';
+            } else if (phaseDone === 4) {
+                document.getElementById('completion-title').textContent = 'Hoàn Thành Vòng Thử Thách';
+                document.getElementById('completion-desc').textContent = 'Bạn đã chấm xong Vòng Thử Thách.';
             } else if (!isFinished) {
                 document.getElementById('completion-title').textContent = 'Bảng Điểm Tạm Thời';
                 document.getElementById('completion-desc').textContent = 'Bạn có thể xem lại điểm đã chấm. Bấm "Tiếp Tục Chấm Điểm" để quay lại.';
@@ -731,11 +779,17 @@
                     }
                 }
 
+                let r4Html = '-';
+                if (typeof s.thuThach !== 'undefined') {
+                    r4Html = `<div style="font-weight:bold; color:#e91e63; font-size:1.1rem;">${s.thuThach.toFixed(1)}đ</div>`;
+                }
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `<td><strong>👤 ${c.sbd ? `[SBD ${c.sbd}] ` : ''}${c.name}</strong></td>
                                 <td style="text-align:center;">${r1Html}</td>
                                 <td style="text-align:center;">${r2Html}</td>
-                                <td style="text-align:center;">${r3Html}</td>`;
+                                <td style="text-align:center;">${r3Html}</td>
+                                <td style="text-align:center;">${r4Html}</td>`;
                 tbody.appendChild(tr);
             });
         }

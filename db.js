@@ -31,6 +31,10 @@ if (usePostgres) {
         .then(() => console.log('Auto-migration: ung_xu column checked.'))
         .catch(err => console.error('Auto-migration ung_xu error:', err.message));
 
+    pool.query("ALTER TABLE scores ADD COLUMN IF NOT EXISTS thu_thach NUMERIC(4,2)")
+        .then(() => console.log('Auto-migration: thu_thach column checked.'))
+        .catch(err => console.error('Auto-migration thu_thach error:', err.message));
+
     pool.query(`CREATE TABLE IF NOT EXISTS archived_rounds (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
@@ -169,11 +173,13 @@ module.exports = {
                 let aoDai = s.ao_dai !== null ? parseFloat(s.ao_dai) : undefined;
                 let inspiration = s.inspiration !== null ? parseFloat(s.inspiration) : undefined;
                 let ungXu = s.ung_xu !== null ? parseFloat(s.ung_xu) : undefined;
+                let thuThach = s.thu_thach !== null ? parseFloat(s.thu_thach) : undefined;
                 
                 // Khắc phục lỗi dữ liệu cũ bị chèn 0 thay vì null khi chưa chấm
                 if (aoDai === 0 && (!s.details || !s.details.r1)) aoDai = undefined;
                 if (inspiration === 0 && (!s.details || !s.details.r2)) inspiration = undefined;
                 if (ungXu === 0 && (!s.details || !s.details.r3)) ungXu = undefined;
+                if (thuThach === 0 && (!s.details || !s.details.r4)) thuThach = undefined;
 
                 return {
                     judge: s.judge,
@@ -181,6 +187,7 @@ module.exports = {
                     aoDai,
                     inspiration,
                     ungXu,
+                    thuThach,
                     details: s.details
                 };
             });
@@ -283,7 +290,7 @@ module.exports = {
         }
     },
 
-    saveScore: async (judge, candidateId, aoDai, inspiration, ungXu, detailsR1, detailsR2, detailsR3) => {
+    saveScore: async (judge, candidateId, aoDai, inspiration, ungXu, thuThach, detailsR1, detailsR2, detailsR3) => {
         if (usePostgres) {
             const existing = await pool.query('SELECT * FROM scores WHERE judge = $1 AND candidate_id = $2', [judge, candidateId]);
             if (existing.rows.length > 0) {
@@ -298,16 +305,19 @@ module.exports = {
                     await pool.query('UPDATE scores SET inspiration = $1, details = $4 WHERE judge = $2 AND candidate_id = $3', [inspiration, judge, candidateId, currentDetails]);
                 } else if (typeof ungXu !== 'undefined') {
                     await pool.query('UPDATE scores SET ung_xu = $1, details = $4 WHERE judge = $2 AND candidate_id = $3', [ungXu, judge, candidateId, currentDetails]);
+                } else if (typeof thuThach !== 'undefined') {
+                    await pool.query('UPDATE scores SET thu_thach = $1, details = $4 WHERE judge = $2 AND candidate_id = $3', [thuThach, judge, candidateId, currentDetails]);
                 }
             } else {
                 const ad = typeof aoDai !== 'undefined' ? aoDai : null;
                 const ins = typeof inspiration !== 'undefined' ? inspiration : null;
                 const ux = typeof ungXu !== 'undefined' ? ungXu : null;
+                const tt = typeof thuThach !== 'undefined' ? thuThach : null;
                 let currentDetails = {};
                 if (detailsR1) currentDetails.r1 = detailsR1;
                 if (detailsR2) currentDetails.r2 = detailsR2;
                 if (detailsR3) currentDetails.r3 = detailsR3;
-                await pool.query('INSERT INTO scores (judge, candidate_id, ao_dai, inspiration, ung_xu, details) VALUES ($1, $2, $3, $4, $5, $6)', [judge, candidateId, ad, ins, ux, currentDetails]);
+                await pool.query('INSERT INTO scores (judge, candidate_id, ao_dai, inspiration, ung_xu, thu_thach, details) VALUES ($1, $2, $3, $4, $5, $6, $7)', [judge, candidateId, ad, ins, ux, tt, currentDetails]);
             }
         } else {
             const contest = readJSON(contestFilePath, { teams: [], candidates: [], scores: [] });
@@ -318,6 +328,7 @@ module.exports = {
                 if (typeof aoDai !== 'undefined') currentScore.aoDai = aoDai;
                 if (typeof inspiration !== 'undefined') currentScore.inspiration = inspiration;
                 if (typeof ungXu !== 'undefined') currentScore.ungXu = ungXu;
+                if (typeof thuThach !== 'undefined') currentScore.thuThach = thuThach;
                 if (detailsR1) currentScore.details.r1 = detailsR1;
                 if (detailsR2) currentScore.details.r2 = detailsR2;
                 if (detailsR3) currentScore.details.r3 = detailsR3;
@@ -333,6 +344,7 @@ module.exports = {
                     aoDai,
                     inspiration,
                     ungXu,
+                    thuThach,
                     details: currentDetails
                 });
             }
@@ -393,8 +405,10 @@ module.exports = {
                 scores: r.data.scores.map(s => ({
                     judge: s.judge,
                     candidateId: s.candidate_id,
-                    aoDai: s.ao_dai ? parseFloat(s.ao_dai) : undefined,
-                    inspiration: s.inspiration ? parseFloat(s.inspiration) : undefined,
+                    aoDai: s.ao_dai !== null && s.ao_dai !== undefined ? parseFloat(s.ao_dai) : undefined,
+                    inspiration: s.inspiration !== null && s.inspiration !== undefined ? parseFloat(s.inspiration) : undefined,
+                    ungXu: s.ung_xu !== null && s.ung_xu !== undefined ? parseFloat(s.ung_xu) : undefined,
+                    thuThach: s.thu_thach !== null && s.thu_thach !== undefined ? parseFloat(s.thu_thach) : undefined,
                     details: s.details
                 })),
                 createdAt: r.created_at

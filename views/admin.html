@@ -289,6 +289,9 @@
                         <label style="color: #fff; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
                             <input type="checkbox" value="r7" class="admin-scoring-cb" onchange="updateScoringMode()"> Vòng 7 (Ứng Xử)
                         </label>
+                        <label style="color: #fff; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" value="rThuThach" class="admin-scoring-cb" onchange="updateScoringMode()"> Vòng Thử Thách
+                        </label>
                     </div>
                 </div>
 
@@ -360,6 +363,28 @@
                                 </tr>
                             </thead>
                             <tbody id="ungxu-admin-board">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; font-style: italic;">Đang tải...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- BẢNG XẾP HẠNG: THỬ THÁCH -->
+                    <h4 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--accent-blue);">🏆 Bảng Xếp Hạng:
+                        Vòng Thử Thách</h4>
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px; text-align: center;">Hạng</th>
+                                    <th>Thí sinh</th>
+                                    <th>Đội Mentor</th>
+                                    <th>Chi tiết Điểm </th>
+                                    <th style="width: 100px; text-align: center;">Điểm TB</th>
+                                </tr>
+                            </thead>
+                            <tbody id="thuthach-admin-board">
                                 <tr>
                                     <td colspan="5" style="text-align: center; font-style: italic;">Đang tải...</td>
                                 </tr>
@@ -740,6 +765,7 @@
                                 if (type === 'inspiration' && s.details.r2) detailsStr = s.details.r2.join(' | ');
                                 if (type === 'ungXu' && s.details.r3) detailsStr = s.details.r3.join(' | ');
                             }
+                            if (type === 'thuThach') detailsStr = '(Không có tiêu chí phụ)';
                             row.push(detailsStr);
                         } else {
                             row.push('');
@@ -756,10 +782,12 @@
             const sheetAoDai = generateSheetData('aoDai');
             const sheetInspiration = generateSheetData('inspiration');
             const sheetUngXu = generateSheetData('ungXu');
+            const sheetThuThach = generateSheetData('thuThach');
 
             XLSX.utils.book_append_sheet(wb, sheetAoDai, 'Vòng 1 - Dạ Hội');
             XLSX.utils.book_append_sheet(wb, sheetInspiration, 'Vòng 6 - Truyền Cảm Hứng');
             XLSX.utils.book_append_sheet(wb, sheetUngXu, 'Vòng 7 - Ứng Xử');
+            XLSX.utils.book_append_sheet(wb, sheetThuThach, 'Vòng Thử Thách');
 
             const fileName = customName ? `BangDiem_${customName}_${new Date().toISOString().slice(0, 10)}.xlsx` : `BangDiem_ChungKet_${new Date().toISOString().slice(0, 10)}.xlsx`;
             XLSX.writeFile(wb, fileName);
@@ -794,6 +822,7 @@
             renderAdminBoard('aoDai', 'aodai-admin-board', 'Vòng 1: Dạ Hội');
             renderAdminBoard('inspiration', 'inspiration-admin-board', 'Vòng 6: Truyền Cảm Hứng');
             renderAdminBoard('ungXu', 'ungxu-admin-board', 'Vòng 7: Ứng Xử');
+            renderAdminBoard('thuThach', 'thuthach-admin-board', 'Vòng Thử Thách');
         }
 
         function renderAdminBoard(type, tbodyId, typeName) {
@@ -841,9 +870,15 @@
                                 } else {
                                     detailsStr = `<div style="font-size:0.75rem; color:#ff4d4f; margin-top:0.1rem;">(Chưa có chi tiết - Hãy làm mới (Ctrl + F5) trang chấm điểm)</div>`;
                                 }
+                            } else if (type === 'thuThach') {
+                                detailsStr = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.1rem;">(Không có tiêu chí phụ)</div>`;
                             }
                         } else {
-                            detailsStr = `<div style="font-size:0.75rem; color:#ff4d4f; margin-top:0.1rem;">(Chưa có dữ liệu chi tiết)</div>`;
+                            if (type === 'thuThach') {
+                                detailsStr = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.1rem;">(Không có tiêu chí phụ)</div>`;
+                            } else {
+                                detailsStr = `<div style="font-size:0.75rem; color:#ff4d4f; margin-top:0.1rem;">(Chưa có dữ liệu chi tiết)</div>`;
+                            }
                         }
 
                         return `

@@ -146,7 +146,7 @@ app.get('/api/data', requireLogin, async (req, res) => {
 app.post('/admin/set-scoring-mode', requireAdmin, async (req, res) => {
     try {
         const mode = req.body.mode || '';
-        const validTokens = ['all', 'r1', 'r6', 'r7', 'none'];
+        const validTokens = ['all', 'r1', 'r6', 'r7', 'rThuThach', 'none'];
         const isValid = mode.split(',').every(t => validTokens.includes(t.trim()));
         if (isValid) {
             await db.updateScoringMode(mode);
@@ -406,7 +406,7 @@ app.post('/admin/toggle-r7', requireAdmin, async (req, res) => {
 
 // Xử lý điểm (Giám khảo) chấm điểm / cập nhật điểm thí sinh (Bán kết: Áo dài, Truyền cảm hứng)
 app.post('/judge/score', requireJudge, async (req, res) => {
-    const { candidateId, aoDai, inspiration, ungXu, detailsR1, detailsR2, detailsR3 } = req.body;
+    const { candidateId, aoDai, inspiration, ungXu, thuThach, detailsR1, detailsR2, detailsR3 } = req.body;
     if (!candidateId) {
         return res.status(400).json({ error: 'missing_candidate_id' });
     }
@@ -429,6 +429,12 @@ app.post('/judge/score', requireJudge, async (req, res) => {
         parsedUngXu = parseFloat(ungXu);
         if (isNaN(parsedUngXu) || parsedUngXu < 0 || parsedUngXu > 10) return res.status(400).json({ error: 'invalid_ungxu' });
     }
+
+    let parsedThuThach = undefined;
+    if (typeof thuThach !== 'undefined') {
+        parsedThuThach = parseFloat(thuThach);
+        if (isNaN(parsedThuThach) || parsedThuThach < 6 || parsedThuThach > 10) return res.status(400).json({ error: 'invalid_thuthach' });
+    }
     
     console.log("POST /judge/score Received:", req.body);
     let parsedDetailsR1 = undefined;
@@ -447,7 +453,7 @@ app.post('/judge/score', requireJudge, async (req, res) => {
     }
 
     try {
-        await db.saveScore(judgeUsername, candidateId, parsedAoDai, parsedInspiration, parsedUngXu, parsedDetailsR1, parsedDetailsR2, parsedDetailsR3);
+        await db.saveScore(judgeUsername, candidateId, parsedAoDai, parsedInspiration, parsedUngXu, parsedThuThach, parsedDetailsR1, parsedDetailsR2, parsedDetailsR3);
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'db_error' });
