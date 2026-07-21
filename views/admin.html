@@ -916,7 +916,16 @@
                     }).join('');
                 }
 
-                const avgScore = count > 0 ? (sum / count) : null;
+                let avgScore = null;
+                if (count > 0) {
+                    if (type === 'thuThach' && count > 2) {
+                        const raw = validScores.map(s => s[type]).sort((a,b) => a-b);
+                        const trimmedSum = raw.slice(1, -1).reduce((a,b) => a+b, 0);
+                        avgScore = trimmedSum / (count - 2);
+                    } else {
+                        avgScore = sum / count;
+                    }
+                }
 
                 return {
                     ...cand,
