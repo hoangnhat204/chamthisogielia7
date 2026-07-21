@@ -539,7 +539,7 @@
                         </div>
                         <div style="display:flex; gap: 10px; align-items: center;">
                             <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">${createdDate}</span>
-                            <button class="btn-small btn-success" style="margin: 0; padding: 0.2rem 0.5rem; font-size: 0.8rem;" onclick="exportScoresToExcel(appData.archives.find(a => a.id === '${arc.id}').scores, '${arc.name.replace(/[\\\\/\'\"*?<>|]/g, '_')}')">Xuất Excel</button>
+                            <button class="btn-small btn-success" style="margin: 0; padding: 0.2rem 0.5rem; font-size: 0.8rem;" onclick="exportScoresToExcel(appData.archives.find(a => a.id == '${arc.id}').scores, '${arc.name.replace(/[\\\\/\'\"*?<>|]/g, '_')}')">Xuất Excel</button>
                         </div>
                     </div>
                     <div id="${detailsId}" style="display: none; padding-top: 1rem;">
