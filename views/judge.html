@@ -416,6 +416,11 @@
                 if (r.ok) {
                     const newData = await r.json();
                     const modeChanged = appData.scoringMode && newData.scoringMode && appData.scoringMode !== newData.scoringMode;
+                    
+                    const oldMyScoresCount = (appData.scores || []).filter(s => currentUser && s.judge === currentUser.username).length;
+                    const newMyScoresCount = (newData.scores || []).filter(s => currentUser && s.judge === currentUser.username).length;
+                    const scoresArchived = (oldMyScoresCount > 0 && newMyScoresCount === 0);
+
                     appData = newData;
 
                     if (appData.scoringMode && appData.scoringMode !== 'all') {
@@ -435,7 +440,7 @@
 
                     if (!silent) {
                         if (auto) resumeProgress(); else renderWizard();
-                    } else if (modeChanged) {
+                    } else if (modeChanged || scoresArchived) {
                         resumeProgress();
                     }
                 }
