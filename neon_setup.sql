@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS scores CASCADE;
 DROP TABLE IF EXISTS candidates CASCADE;
 DROP TABLE IF EXISTS teams CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS app_settings CASCADE;
 
 -- 2. Create tables
 CREATE TABLE archived_rounds (
@@ -23,6 +24,12 @@ CREATE TABLE users (
     role VARCHAR(50) NOT NULL,
     status VARCHAR(20) DEFAULT 'active'
 );
+
+CREATE TABLE app_settings (
+    "key" VARCHAR(50) PRIMARY KEY,
+    "value" VARCHAR(255) NOT NULL
+);
+INSERT INTO app_settings ("key", "value") VALUES ('scoringMode', 'all');
 
 CREATE TABLE teams (
     id VARCHAR(100) PRIMARY KEY,
@@ -46,6 +53,7 @@ CREATE TABLE scores (
     ao_dai NUMERIC(4, 2) NULL,
     inspiration NUMERIC(4, 2) NULL,
     ung_xu NUMERIC(4, 2) NULL,
+    thu_thach NUMERIC(4, 2) NULL,
     details JSONB DEFAULT '{}'::jsonb,
     CONSTRAINT unique_judge_candidate UNIQUE (judge, candidate_id)
 );
