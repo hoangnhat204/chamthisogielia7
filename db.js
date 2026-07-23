@@ -570,7 +570,15 @@ module.exports = {
 
     updateScoringMode: async (mode) => {
         if (usePostgres) {
-            await pool.query(`INSERT INTO app_settings ("key", "value") VALUES ('scoringMode', $1) ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value"`, [mode]);
+            try {
+                const updateRes = await pool.query(`UPDATE app_settings SET "value" = $1 WHERE "key" = 'scoringMode'`, [mode]);
+                if (updateRes.rowCount === 0) {
+                    await pool.query(`INSERT INTO app_settings ("key", "value") VALUES ('scoringMode', $1)`, [mode]);
+                }
+            } catch (err) {
+                console.error("Lỗi cập nhật scoringMode:", err.message);
+                throw err;
+            }
         } else {
             const data = readJSON(contestFilePath, { teams: [], candidates: [], scores: [], scoringMode: 'all' });
             data.scoringMode = mode;

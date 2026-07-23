@@ -684,20 +684,23 @@
                         candidatesHTML += `
                             <li class="action-item">
                                 <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-                                    <div style="display:flex; align-items:center; gap: 10px;">
+                                    <div style="display:flex; align-items:center;">
                                         <strong>👤 ${cand.sbd ? `[SBD ${cand.sbd}] ` : ''}${cand.name}</strong> 
-                                        <div style="font-size: 0.8rem; color: var(--text-muted); display:flex; align-items:center; gap: 5px;">
-                                            Thứ tự V1: <input type="number" min="1" max="99" value="${cand.orderR1 || 99}" 
-                                                style="width: 50px; padding: 0.1rem; border-radius: 4px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: #fff; text-align: center;"
+                                    </div>
+                                    <div style="display:flex; gap:15px; align-items:center; flex-wrap: wrap;">
+                                        <div style="font-size: 0.85rem; color: var(--text-main); display:flex; align-items:center; gap: 5px;">
+                                            <span style="white-space: nowrap;">Thứ tự V1:</span> 
+                                            <input type="number" min="1" max="99" value="${cand.orderR1 || 99}" 
+                                                style="width: 50px; padding: 0.2rem; border-radius: 4px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: #fff; text-align: center; margin:0;"
                                                 onchange="updateOrderR1('${cand.id}', this.value)">
                                         </div>
-                                    </div>
-                                    <div style="display:flex; gap:10px; align-items:center;">
-                                        <label style="font-size:0.85rem; color:var(--text-main); cursor:pointer;">
-                                            <input type="checkbox" onchange="toggleR6('${cand.id}', this.checked)" ${cand.selectedForR6 ? 'checked' : ''}> Vòng 6
+                                        <label style="font-size:0.85rem; color:var(--text-main); cursor:pointer; display:flex; align-items:center; gap: 5px; flex-direction:row; margin:0;">
+                                            <input type="checkbox" style="margin:0;" onchange="toggleR6('${cand.id}', this.checked)" ${cand.selectedForR6 ? 'checked' : ''}> 
+                                            <span style="white-space: nowrap;">Vòng 6</span>
                                         </label>
-                                        <label style="font-size:0.85rem; color:var(--text-main); cursor:pointer;">
-                                            <input type="checkbox" onchange="toggleR7('${cand.id}', this.checked)" ${cand.selectedForR7 ? 'checked' : ''}> Vòng 7
+                                        <label style="font-size:0.85rem; color:var(--text-main); cursor:pointer; display:flex; align-items:center; gap: 5px; flex-direction:row; margin:0;">
+                                            <input type="checkbox" style="margin:0;" onchange="toggleR7('${cand.id}', this.checked)" ${cand.selectedForR7 ? 'checked' : ''}> 
+                                            <span style="white-space: nowrap;">Vòng 7</span>
                                         </label>
                                         <button class="btn-small btn-danger" onclick="deleteCandidate('${cand.id}')">Xóa</button>
                                     </div>
