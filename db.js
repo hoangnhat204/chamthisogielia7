@@ -23,6 +23,10 @@ if (usePostgres) {
         .then(() => console.log('Auto-migration: details column checked.'))
         .catch(err => console.error('Auto-migration details error:', err.message));
 
+    pool.query("ALTER TABLE candidates ADD COLUMN IF NOT EXISTS selected_r6 BOOLEAN DEFAULT FALSE")
+        .then(() => console.log('Auto-migration: selected_r6 column checked.'))
+        .catch(err => console.error('Auto-migration selected_r6 error:', err.message));
+
     pool.query("ALTER TABLE candidates ADD COLUMN IF NOT EXISTS selected_r7 BOOLEAN DEFAULT FALSE")
         .then(() => console.log('Auto-migration: selected_r7 column checked.'))
         .catch(err => console.error('Auto-migration selected_r7 error:', err.message));
@@ -165,6 +169,7 @@ module.exports = {
                 sbd: c.sbd,
                 teamId: c.team_id,
                 kahoot: c.kahoot ? parseFloat(c.kahoot) : 0,
+                selectedForR6: !!c.selected_r6,
                 selectedForR7: !!c.selected_r7
             }));
 
@@ -232,10 +237,10 @@ module.exports = {
 
     addCandidate: async (id, name, sbd, teamId) => {
         if (usePostgres) {
-            await pool.query('INSERT INTO candidates (id, name, sbd, team_id, kahoot, selected_r7) VALUES ($1, $2, $3, $4, 0, FALSE)', [id, name, sbd, teamId]);
+            await pool.query('INSERT INTO candidates (id, name, sbd, team_id, kahoot, selected_r6, selected_r7) VALUES ($1, $2, $3, $4, 0, FALSE, FALSE)', [id, name, sbd, teamId]);
         } else {
             const contest = readJSON(contestFilePath, { teams: [], candidates: [], scores: [] });
-            contest.candidates.push({ id, name, sbd, teamId, kahoot: 0, selectedForR7: false });
+            contest.candidates.push({ id, name, sbd, teamId, kahoot: 0, selectedForR6: false, selectedForR7: false });
             writeJSON(contestFilePath, contest);
         }
     },
@@ -277,14 +282,14 @@ module.exports = {
         }
     },
 
-    toggleCandidateR7: async (candidateId, selected) => {
+    toggleCandidateR6: async (candidateId, selected) => {
         if (usePostgres) {
-            await pool.query('UPDATE candidates SET selected_r7 = $1 WHERE id = $2', [selected, candidateId]);
+            await pool.query('UPDATE candidates SET selected_r6 = $1 WHERE id = $2', [selected, candidateId]);
         } else {
             const contest = readJSON(contestFilePath, { teams: [], candidates: [], scores: [] });
             const cand = contest.candidates.find(c => c.id === candidateId);
             if (cand) {
-                cand.selectedForR7 = selected;
+                cand.selectedForR6 = selected;
                 writeJSON(contestFilePath, contest);
             }
         }

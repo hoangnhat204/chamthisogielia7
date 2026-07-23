@@ -355,6 +355,7 @@
 
         function getPhaseCandidates(phase) {
             const cand = appData.candidates || [];
+            if (phase === 2) return cand.filter(c => c.selectedForR6);
             if (phase === 3) return cand.filter(c => c.selectedForR7);
             return cand;
         }
@@ -756,12 +757,16 @@
                 }
 
                 let r2Html = '-';
-                if (typeof s.inspiration !== 'undefined') {
-                    r2Html = `<div style="font-weight:bold; color:#52c41a; font-size:1.1rem;">${s.inspiration.toFixed(1)}đ</div>`;
-                    if (s.details && s.details.r2) {
-                        r2Html += `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">
-                            [${s.details.r2.map(d => d + 'đ').join(' | ')}]
-                        </div>`;
+                if (c.selectedForR6) {
+                    if (typeof s.inspiration !== 'undefined') {
+                        r2Html = `<div style="font-weight:bold; color:#52c41a; font-size:1.1rem;">${s.inspiration.toFixed(1)}đ</div>`;
+                        if (s.details && s.details.r2) {
+                            r2Html += `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">
+                                [${s.details.r2.map(d => d + 'đ').join(' | ')}]
+                            </div>`;
+                        }
+                    } else {
+                        r2Html = '<span style="color:var(--text-muted); font-style:italic;">Chưa chấm</span>';
                     }
                 }
 

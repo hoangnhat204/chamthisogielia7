@@ -9,8 +9,8 @@ const port = process.env.PORT || 3000;
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
     name: 'session',
-    keys: [process.env.SESSION_SECRET || 'my-secret-key-123']
-    // Đã xóa maxAge để cookie bị hủy khi tắt trình duyệt/tab
+    keys: [process.env.SESSION_SECRET || 'my-secret-key-123'],
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 ngày để không bị văng đăng nhập
 }));
 
 // Phục vụ file styles.css tĩnh
@@ -457,6 +457,20 @@ app.post('/judge/score', requireJudge, async (req, res) => {
         await db.saveScore(judgeUsername, candidateId, parsedAoDai, parsedInspiration, parsedUngXu, parsedThuThach, parsedDetailsR1, parsedDetailsR2, parsedDetailsR3);
         res.json({ success: true });
     } catch (err) {
+        res.status(500).json({ error: 'db_error' });
+    }
+});
+
+app.post('/admin/toggle-r6', requireAdmin, async (req, res) => {
+    const { candidateId, selected } = req.body;
+    if (!candidateId || selected === undefined) {
+        return res.status(400).json({ error: 'missing_data' });
+    }
+    try {
+        await db.toggleCandidateR6(candidateId, selected === 'true' || selected === true);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'db_error' });
     }
 });
