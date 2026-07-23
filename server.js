@@ -68,8 +68,10 @@ const requireJudge = (req, res, next) => {
 
 // Route hiển thị form đăng nhập
 app.get('/login', (req, res) => {
-    // Đã vào trang login thì tự động đăng xuất luôn để tránh việc bị đăng nhập tự động
-    req.session = null;
+    if (req.session && req.session.user) {
+        if (req.session.user.role === 'admin') return res.redirect('/admin');
+        if (req.session.user.role === 'judge') return res.redirect('/judge');
+    }
     res.sendFile(path.join(__dirname, 'views', 'login.html'));
 });
 
@@ -162,7 +164,10 @@ app.post('/admin/set-scoring-mode', requireAdmin, async (req, res) => {
 
 // Các route hiển thị trang giao diện
 app.get('/', (req, res) => {
-    req.session = null; // Bắt buộc đăng xuất khi truy cập vào link gốc
+    if (req.session && req.session.user) {
+        if (req.session.user.role === 'admin') return res.redirect('/admin');
+        if (req.session.user.role === 'judge') return res.redirect('/judge');
+    }
     res.redirect('/login');
 });
 
