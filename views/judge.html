@@ -357,18 +357,22 @@
 
         function getPhaseCandidates(phase) {
             let cand = [...(appData.candidates || [])];
+            
+            // Hàm hỗ trợ sắp xếp theo SBD tăng dần
+            const sortBySBD = (a, b) => {
+                const sbdA = parseInt(a.sbd || '999', 10);
+                const sbdB = parseInt(b.sbd || '999', 10);
+                return sbdA - sbdB;
+            };
+
             if (phase === 1) {
                 cand = cand.sort((a, b) => (a.orderR1 || 99) - (b.orderR1 || 99));
             } else if (phase === 2) {
-                cand = cand.filter(c => c.selectedForR6).sort((a, b) => (a.orderR1 || 99) - (b.orderR1 || 99));
+                cand = cand.filter(c => c.selectedForR6).sort(sortBySBD);
             } else if (phase === 3) {
-                cand = cand.filter(c => c.selectedForR7).sort((a, b) => {
-                    const sbdA = parseInt(a.sbd || '999', 10);
-                    const sbdB = parseInt(b.sbd || '999', 10);
-                    return sbdA - sbdB;
-                });
+                cand = cand.filter(c => c.selectedForR7).sort(sortBySBD);
             } else if (phase === 4) {
-                cand = cand.sort((a, b) => (a.orderR1 || 99) - (b.orderR1 || 99));
+                cand = cand.sort(sortBySBD);
             }
             return cand;
         }
