@@ -356,10 +356,20 @@
         ];
 
         function getPhaseCandidates(phase) {
-            let cand = appData.candidates || [];
-            if (phase === 1) cand = cand.sort((a, b) => (a.orderR1 || 99) - (b.orderR1 || 99));
-            if (phase === 2) return cand.filter(c => c.selectedForR6);
-            if (phase === 3) return cand.filter(c => c.selectedForR7);
+            let cand = [...(appData.candidates || [])];
+            if (phase === 1) {
+                cand = cand.sort((a, b) => (a.orderR1 || 99) - (b.orderR1 || 99));
+            } else if (phase === 2) {
+                cand = cand.filter(c => c.selectedForR6).sort((a, b) => (a.orderR1 || 99) - (b.orderR1 || 99));
+            } else if (phase === 3) {
+                cand = cand.filter(c => c.selectedForR7).sort((a, b) => {
+                    const sbdA = parseInt(a.sbd || '999', 10);
+                    const sbdB = parseInt(b.sbd || '999', 10);
+                    return sbdA - sbdB;
+                });
+            } else if (phase === 4) {
+                cand = cand.sort((a, b) => (a.orderR1 || 99) - (b.orderR1 || 99));
+            }
             return cand;
         }
 
