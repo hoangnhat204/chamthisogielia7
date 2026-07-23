@@ -331,26 +331,26 @@
         let selectedCriteria = [];
 
         const criteriaR1 = [
-            { name: "Thần thái", max: 3.0, step: 0.5 },
-            { name: "Kỹ năng trình diễn", max: 3.0, step: 0.5 },
-            { name: "Khả năng trình diễn trang phục dạ hội", max: 2.0, step: 0.5 },
-            { name: "Ấn tượng tổng thể", max: 2.0, step: 0.5 }
+            { name: "Thần thái", min: 1.0, max: 3.0, step: 0.5 },
+            { name: "Kỹ năng trình diễn", min: 1.0, max: 3.0, step: 0.5 },
+            { name: "Khả năng trình diễn trang phục dạ hội", min: 1.0, max: 2.0, step: 0.5 },
+            { name: "Ấn tượng tổng thể", min: 1.0, max: 2.0, step: 0.5 }
         ];
 
         const criteriaR2 = [
-            { name: "Nội dung, thông điệp", max: 2.5, step: 0.5 },
-            { name: "Câu chuyện và cảm xúc", max: 2.5, step: 0.5 },
-            { name: "Liên hệ bản thân với phong trào, hoạt động LGBTIQ+", max: 3.0, step: 0.5 },
-            { name: "Kỹ năng trình bày", max: 2.0, step: 0.5 }
+            { name: "Nội dung, thông điệp", min: 1.0, max: 2.5, step: 0.5 },
+            { name: "Câu chuyện và cảm xúc", min: 1.0, max: 2.5, step: 0.5 },
+            { name: "Liên hệ bản thân với phong trào, hoạt động LGBTIQ+", min: 1.0, max: 3.0, step: 0.5 },
+            { name: "Kỹ năng trình bày", min: 1.0, max: 2.0, step: 0.5 }
         ];
 
         const criteriaR3 = [
-            { name: "Nội dung trả lời trọng tâm", max: 5.0, step: 0.5 },
-            { name: "Phong thái, tự tin, bản lĩnh", max: 5.0, step: 0.5 }
+            { name: "Nội dung trả lời trọng tâm", min: 1.0, max: 5.0, step: 0.5 },
+            { name: "Phong thái, tự tin, bản lĩnh", min: 1.0, max: 5.0, step: 0.5 }
         ];
 
         const criteriaR4 = [
-            { name: "Điểm Thử Thách", min: 6.0, max: 10.0, step: 0.5 }
+            { name: "Điểm Thử Thách", min: 1.0, max: 10.0, step: 0.5 }
         ];
 
         function getPhaseCandidates(phase) {

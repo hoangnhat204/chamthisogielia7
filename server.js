@@ -434,7 +434,7 @@ app.post('/judge/score', requireJudge, async (req, res) => {
     let parsedThuThach = undefined;
     if (typeof thuThach !== 'undefined') {
         parsedThuThach = parseFloat(thuThach);
-        if (isNaN(parsedThuThach) || parsedThuThach < 6 || parsedThuThach > 10) return res.status(400).json({ error: 'invalid_thuthach' });
+        if (isNaN(parsedThuThach) || parsedThuThach < 0 || parsedThuThach > 10) return res.status(400).json({ error: 'invalid_thuthach' });
     }
     
     console.log("POST /judge/score Received:", req.body);
