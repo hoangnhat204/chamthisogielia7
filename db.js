@@ -23,6 +23,10 @@ if (usePostgres) {
         .then(() => console.log('Auto-migration: details column checked.'))
         .catch(err => console.error('Auto-migration details error:', err.message));
 
+    pool.query("ALTER TABLE candidates ADD COLUMN IF NOT EXISTS order_r1 INTEGER DEFAULT 99")
+        .then(() => console.log('Auto-migration: order_r1 column checked.'))
+        .catch(err => console.error('Auto-migration order_r1 error:', err.message));
+
     pool.query("ALTER TABLE candidates ADD COLUMN IF NOT EXISTS selected_r6 BOOLEAN DEFAULT FALSE")
         .then(() => console.log('Auto-migration: selected_r6 column checked.'))
         .catch(err => console.error('Auto-migration selected_r6 error:', err.message));
@@ -169,6 +173,7 @@ module.exports = {
                 sbd: c.sbd,
                 teamId: c.team_id,
                 kahoot: c.kahoot ? parseFloat(c.kahoot) : 0,
+                orderR1: c.order_r1 !== null ? parseInt(c.order_r1) : 99,
                 selectedForR6: !!c.selected_r6,
                 selectedForR7: !!c.selected_r7
             }));
@@ -277,6 +282,19 @@ module.exports = {
             const cand = contest.candidates.find(c => c.id === candidateId);
             if (cand) {
                 cand.selectedForR7 = selected;
+                writeJSON(contestFilePath, contest);
+            }
+        }
+    },
+
+    updateCandidateOrderR1: async (candidateId, orderR1) => {
+        if (usePostgres) {
+            await pool.query('UPDATE candidates SET order_r1 = $1 WHERE id = $2', [orderR1, candidateId]);
+        } else {
+            const contest = readJSON(contestFilePath, { teams: [], candidates: [], scores: [] });
+            const cand = contest.candidates.find(c => c.id === candidateId);
+            if (cand) {
+                cand.orderR1 = orderR1;
                 writeJSON(contestFilePath, contest);
             }
         }
@@ -431,7 +449,7 @@ module.exports = {
                 const existing = await pool.query('SELECT id FROM teams WHERE LOWER(TRIM(name)) = LOWER(TRIM($1))', [newTeam.name]);
                 if (existing.rows.length === 0) {
                     const teamId = 'team_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-                    await pool.query('INSERT INTO teams (id, name, mentors) VALUES ($1, $2, $3)', [teamId, newTeam.name.trim(), JSON.stringify(newTeam.mentors)]);
+                    await pool.query('INSERT INTO teams (id, name, mentors) VALUES ($1, $2, $3)', [teamId, newTeam.name.trim(), newTeam.mentors]);
                     newTeam.mappedId = teamId;
                 } else {
                     newTeam.mappedId = existing.rows[0].id;
@@ -442,7 +460,7 @@ module.exports = {
                             currentMentors.push(m.trim());
                         }
                     });
-                    await pool.query('UPDATE teams SET mentors = $1 WHERE id = $2', [JSON.stringify(currentMentors), newTeam.mappedId]);
+                    await pool.query('UPDATE teams SET mentors = $1 WHERE id = $2', [currentMentors, newTeam.mappedId]);
                 }
             }
 

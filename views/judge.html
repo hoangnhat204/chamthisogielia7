@@ -354,7 +354,8 @@
         ];
 
         function getPhaseCandidates(phase) {
-            const cand = appData.candidates || [];
+            let cand = appData.candidates || [];
+            if (phase === 1) cand = cand.sort((a, b) => (a.orderR1 || 99) - (b.orderR1 || 99));
             if (phase === 2) return cand.filter(c => c.selectedForR6);
             if (phase === 3) return cand.filter(c => c.selectedForR7);
             return cand;

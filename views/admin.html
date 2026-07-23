@@ -684,8 +684,13 @@
                         candidatesHTML += `
                             <li class="action-item">
                                 <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-                                    <div>
+                                    <div style="display:flex; align-items:center; gap: 10px;">
                                         <strong>👤 ${cand.sbd ? `[SBD ${cand.sbd}] ` : ''}${cand.name}</strong> 
+                                        <div style="font-size: 0.8rem; color: var(--text-muted); display:flex; align-items:center; gap: 5px;">
+                                            Thứ tự V1: <input type="number" min="1" max="99" value="${cand.orderR1 || 99}" 
+                                                style="width: 50px; padding: 0.1rem; border-radius: 4px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: #fff; text-align: center;"
+                                                onchange="updateOrderR1('${cand.id}', this.value)">
+                                        </div>
                                     </div>
                                     <div style="display:flex; gap:10px; align-items:center;">
                                         <label style="font-size:0.85rem; color:var(--text-main); cursor:pointer;">
@@ -1359,6 +1364,25 @@
                     loadData();
                 }
             }, 10000);
+        }
+
+        async function updateOrderR1(candidateId, orderR1) {
+            try {
+                const res = await fetch('/admin/update-order-r1', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ candidateId, orderR1 })
+                });
+                if (res.ok) {
+                    const c = appData.candidates.find(x => x.id === candidateId);
+                    if (c) c.orderR1 = parseInt(orderR1) || 99;
+                    showAlert('✅ Đã cập nhật thứ tự thi Vòng 1!');
+                } else {
+                    showAlert('❌ Cập nhật thất bại!', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối!', 'error');
+            }
         }
 
         async function toggleR6(candidateId, selected) {

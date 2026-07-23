@@ -461,6 +461,20 @@ app.post('/judge/score', requireJudge, async (req, res) => {
     }
 });
 
+app.post('/admin/update-order-r1', requireAdmin, async (req, res) => {
+    const { candidateId, orderR1 } = req.body;
+    if (!candidateId || orderR1 === undefined) {
+        return res.status(400).json({ error: 'missing_data' });
+    }
+    try {
+        await db.updateCandidateOrderR1(candidateId, parseInt(orderR1) || 99);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'db_error' });
+    }
+});
+
 app.post('/admin/toggle-r6', requireAdmin, async (req, res) => {
     const { candidateId, selected } = req.body;
     if (!candidateId || selected === undefined) {

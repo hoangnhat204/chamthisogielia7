@@ -42,6 +42,7 @@ CREATE TABLE candidates (
     name VARCHAR(255) NOT NULL,
     sbd VARCHAR(50) DEFAULT '',
     kahoot NUMERIC(4,2) DEFAULT 0,
+    order_r1 INTEGER DEFAULT 99,
     selected_r6 BOOLEAN DEFAULT FALSE,
     selected_r7 BOOLEAN DEFAULT FALSE,
     team_id VARCHAR(100) REFERENCES teams(id) ON DELETE CASCADE
