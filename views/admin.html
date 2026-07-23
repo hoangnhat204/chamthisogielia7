@@ -396,6 +396,8 @@
                         </div>
                     </div>
                 </div>
+
+                </div>
             </div>
         </div>
 
@@ -475,201 +477,6 @@
                 }
 
                 renderUsers();
-                renderCandidates();
-                renderScores();
-                populateKahootCandidates();
-                await loadArchivedRounds();
-            } catch (err) {
-                console.error('Lỗi tải dữ liệu:', err);
-            }
-        }
-
-        function toggleAllScoringModes() {
-            const cbAll = document.getElementById('cb-mode-all');
-            const cbs = document.querySelectorAll('.admin-scoring-cb');
-            cbs.forEach(cb => cb.checked = cbAll.checked);
-            updateScoringMode();
-        }
-
-        async function updateScoringMode() {
-            const cbs = document.querySelectorAll('.admin-scoring-cb');
-            const cbAll = document.getElementById('cb-mode-all');
-            
-            const selected = Array.from(cbs).filter(cb => cb.checked).map(cb => cb.value);
-            let mode = 'none';
-            if (selected.length === cbs.length) {
-                mode = 'all';
-                cbAll.checked = true;
-            } else if (selected.length > 0) {
-                mode = selected.join(',');
-                cbAll.checked = false;
-            } else {
-                cbAll.checked = false;
-            }
-
-            try {
-                const res = await fetch('/admin/set-scoring-mode', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'Accept': 'application/json'
-                    },
-                    body: new URLSearchParams({ mode })
-                });
-                if (res.ok) {
-                    showAlert('Đã lưu chế độ chấm thi thành công!');
-                } else {
-                    showAlert('Lỗi khi lưu cấu hình', 'error');
-                }
-            } catch (e) {
-                showAlert('Lỗi mạng khi lưu', 'error');
-            }
-        }
-
-        async function loadArchivedRounds() {
-            try {
-                const res = await fetch('/api/archived-rounds');
-                if (!res.ok) return;
-                const data = await res.json();
-                appData.archives = data.archives || [];
-                renderArchivedRounds(appData.archives);
-            } catch (e) { console.error('Lỗi tải lịch sử:', e); }
-        }
-
-        function renderArchivedRounds(archives) {
-            const container = document.getElementById('history-container');
-            container.innerHTML = '';
-            if (archives.length === 0) {
-                container.innerHTML = '<p style="text-align:center; font-style:italic;">Chưa có lịch sử bảng điểm nào.</p>';
-                return;
-            }
-
-            archives.forEach(arc => {
-                const block = document.createElement('div');
-                block.className = 'mentor-block';
-                block.style.marginBottom = '1.5rem';
-
-                let scoreHTML = '<ul class="action-list">';
-                if (arc.scores && arc.scores.length > 0) {
-                    // Nhóm điểm theo thí sinh
-                    const grouped = {};
-                    arc.scores.forEach(s => {
-                        if (!grouped[s.candidateId]) grouped[s.candidateId] = [];
-                        grouped[s.candidateId].push(s);
-                    });
-
-                    for (const candId in grouped) {
-                        const cand = appData.candidates.find(c => c.id === candId) || { name: 'Thí sinh (đã xóa)' };
-                        const candScores = grouped[candId];
-                        const details = candScores.map(s => {
-                            let r1Text = `Dạ hội: ${s.aoDai !== null && typeof s.aoDai !== 'undefined' ? s.aoDai.toFixed(1) : '-'}`;
-                            let r2Text = `Truyền cảm hứng: ${s.inspiration !== null && typeof s.inspiration !== 'undefined' ? s.inspiration.toFixed(1) : '-'}`;
-                            let r3Text = `Ứng xử: ${s.ungXu !== null && typeof s.ungXu !== 'undefined' ? s.ungXu.toFixed(1) : '-'}`;
-                            return `<span class="badge badge-judge">${s.judge}</span>: ${r1Text} | ${r2Text} | ${r3Text}`;
-                        }).join(' <br/> ');
-                        
-                        scoreHTML += `<li class="action-item" style="display:block; margin-bottom: 0.5rem;">
-                            <strong>${cand.name}</strong>
-                            <div style="font-size:0.85rem; margin-top:0.2rem; line-height: 1.6;">${details}</div>
-                        </li>`;
-                    }
-                } else {
-                    scoreHTML += '<li class="action-item">Không có điểm</li>';
-                }
-                scoreHTML += '</ul>';
-
-                const createdDate = new Date(arc.created_at || arc.createdAt).toLocaleString('vi-VN');
-                const detailsId = 'history-details-' + (arc.id || Date.now() + Math.random());
-                block.innerHTML = `
-                    <div class="mentor-block-title" style="display:flex; justify-content:space-between; align-items:center;">
-                        <div style="cursor: pointer;" onclick="const el = document.getElementById('${detailsId}'); el.style.display = el.style.display === 'none' ? 'block' : 'none';">
-                            <span>💾 Vòng: <strong style="color:var(--accent-blue);">${arc.name}</strong> <small style="color:var(--text-muted); margin-left:8px; font-weight:normal;">(Bấm để xem/ẩn)</small></span>
-                        </div>
-                        <div style="display:flex; gap: 10px; align-items: center;">
-                            <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">${createdDate}</span>
-                            <button class="btn-small btn-success" style="margin: 0; padding: 0.2rem 0.5rem; font-size: 0.8rem;" onclick="exportScoresToExcel(appData.archives.find(a => a.id == '${arc.id}').scores, '${arc.name.replace(/[\\\\/\'\"*?<>|]/g, '_')}')">Xuất Excel</button>
-                        </div>
-                    </div>
-                    <div id="${detailsId}" style="display: none; padding-top: 1rem;">
-                        ${scoreHTML}
-                    </div>
-                `;
-                container.appendChild(block);
-            });
-        }
-
-        function renderUsers() {
-            const tbody = document.getElementById('users-table-body');
-            tbody.innerHTML = '';
-
-            const sortedUsers = [...appData.users].sort((a, b) => {
-                const rolesOrder = { admin: 1, judge: 2, user: 3 };
-                return (rolesOrder[a.role] || 9) - (rolesOrder[b.role] || 9);
-            });
-
-            sortedUsers.forEach(user => {
-                const tr = document.createElement('tr');
-
-                let badgeClass = 'badge-user';
-                let roleName = 'User';
-                if (user.role === 'admin') { badgeClass = 'badge-admin'; roleName = 'Admin'; }
-                else if (user.role === 'judge') { badgeClass = 'badge-judge'; roleName = 'Judge (BGK)'; }
-
-                const isSelf = user.username === 'admin';
-                const isActive = user.status !== 'inactive';
-                const statusHtml = isActive
-                    ? `<span class="badge" style="background:rgba(82,196,26,0.15); border:1px solid #52c41a; color:#52c41a;">🟢 Đang hoạt động</span>`
-                    : `<span class="badge" style="background:rgba(255,77,79,0.15); border:1px solid #ff4d4f; color:#ff4d4f;">🔴 Bị khóa</span>`;
-
-                const dropdownHtml = `
-                    <select class="btn-small" style="padding: 0.3rem; border-radius: 6px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--glass-border); cursor: pointer;" onchange="handleUserAction(this, '${user.username}')">
-                        <option value="" style="color: #000;">Thao tác</option>
-                        <option value="toggle" style="color: #000;">${isActive ? 'Khóa' : 'Mở Khóa'}</option>
-                        <option value="password" style="color: #000;">Đổi MK</option>
-                        <option value="delete" style="color: #ff4d4f;">Xóa</option>
-                    </select>
-                `;
-
-                tr.innerHTML = `
-                    <td><strong>${user.username}</strong></td>
-                    <td style="font-family: monospace; color: var(--accent-blue);">
-                        ${user.password || ''}
-                    </td>
-                    <td><span class="badge ${badgeClass}">${roleName}</span></td>
-                    <td style="text-align: center;">${statusHtml}</td>
-                    <td style="text-align: center;">
-                        ${isSelf ? `<button class="btn-small" style="padding: 0.3rem; border-radius: 6px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--glass-border); cursor: pointer;" onclick="promptUpdatePassword('${user.username}')">Đổi MK</button>` : dropdownHtml}
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            const teamSelect = document.getElementById('cand_team');
-            const currentVal = teamSelect.value;
-            teamSelect.innerHTML = '<option value="">-- Chọn Đội Mentor --</option>';
-            (appData.teams || []).forEach(team => {
-                const opt = document.createElement('option');
-                opt.value = team.id;
-                opt.textContent = `${team.name} (${team.mentors.join(' & ')})`;
-                teamSelect.appendChild(opt);
-            });
-            if (currentVal) teamSelect.value = currentVal;
-        }
-
-        function renderCandidates() {
-            const container = document.getElementById('mentor-candidates-list');
-            container.innerHTML = '';
-
-            const teams = appData.teams || [];
-
-            if (teams.length === 0) {
-                container.innerHTML = '<p style="text-align: center; font-style: italic;">Chưa có Đội Mentor nào trong hệ thống. Hãy tạo Đội Mentor trước.</p>';
-                return;
-            }
-
-            teams.forEach(team => {
-                const block = document.createElement('div');
-                block.className = 'mentor-block';
                 renderCandidates();
                 renderScores();
                 populateKahootCandidates();
@@ -1121,6 +928,420 @@
                     } else {
                         avgScore = sum / count;
                     }
+                }
+
+                return {
+                    ...cand,
+                    avgScore,
+                    scoresDetailsHTML
+                };
+            });
+
+            const sortedForRank = [...rankedCandidates].sort((a, b) => {
+                if (a.avgScore === null && b.avgScore === null) return 0;
+                if (a.avgScore === null) return 1;
+                if (b.avgScore === null) return -1;
+                return b.avgScore - a.avgScore;
+            });
+
+            sortedForRank.forEach((cand, index) => {
+                cand.calculatedRank = index + 1;
+            });
+
+            rankedCandidates.forEach((cand) => {
+                const tr = document.createElement('tr');
+
+                let rankText = cand.calculatedRank;
+                let rankClass = '';
+                if (rankText === 1) rankClass = 'rank-1';
+                else if (rankText === 2) rankClass = 'rank-2';
+                else if (rankText === 3) rankClass = 'rank-3';
+
+                const avgDisplay = cand.avgScore !== null
+                    ? `<span class="badge btn-success" style="font-size: 1rem; padding: 0.3rem 0.8rem;">${cand.avgScore.toFixed(2)}</span>`
+                    : '<span style="color: var(--text-muted); font-style: italic;">Chưa chấm</span>';
+
+                const team = appData.teams.find(t => t.id === cand.teamId);
+                const teamDisplay = team
+                    ? `👥 <strong>${team.name}</strong> <div style="font-size:0.75rem; color:var(--text-muted);">(${team.mentors.join(' & ')})</div>`
+                    : '<span style="color: var(--text-muted); font-style: italic;">Chưa gán đội</span>';
+
+                tr.innerHTML = `
+                    <td style="text-align: center;"><strong class="${rankClass}">${rankText}</strong></td>
+                    <td><strong>👤 ${cand.sbd ? `[SBD ${cand.sbd}] ` : ''}${cand.name}</strong></td>
+                    <td>${teamDisplay}</td>
+                    <td>${cand.scoresDetailsHTML}</td>
+                    <td style="text-align: center;">${avgDisplay}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('add-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('new_username').value.trim();
+            const password = document.getElementById('new_password').value;
+            const role = document.getElementById('new_role').value;
+
+            try {
+                const res = await fetch('/admin/add-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    body: new URLSearchParams({ username, password, role })
+                });
+
+                if (res.ok) {
+                    showAlert('✅ Thêm tài khoản thành công!');
+                    document.getElementById('add-user-form').reset();
+                    loadData();
+                } else {
+                    const errData = await res.json();
+                    if (errData.error === 'exists') {
+                        showAlert('❌ Tên tài khoản đã tồn tại!', 'error');
+                    } else {
+                        showAlert('❌ Thêm tài khoản thất bại!', 'error');
+                    }
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        });
+
+        document.getElementById('add-team-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('team_name').value.trim();
+            const mentor1 = document.getElementById('team_mentor1').value.trim();
+            const mentor2 = document.getElementById('team_mentor2').value.trim();
+
+            try {
+                const res = await fetch('/admin/add-team', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ name, mentor1, mentor2 })
+                });
+
+                if (res.ok) {
+                    showAlert('✅ Tạo đội Mentor thành công!');
+                    document.getElementById('add-team-form').reset();
+                    loadData();
+                } else {
+                    showAlert('❌ Tạo đội Mentor thất bại!', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        });
+
+        document.getElementById('add-candidate-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('cand_name').value.trim();
+            const sbd = document.getElementById('cand_sbd').value.trim();
+            const teamId = document.getElementById('cand_team').value;
+
+            if (!teamId) {
+                showAlert('❌ Vui lòng chọn Đội Mentor phụ trách!', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/admin/add-candidate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ name, teamId, sbd })
+                });
+
+                if (res.ok) {
+                    showAlert('✅ Thêm thí sinh vào đội thành công!');
+                    document.getElementById('add-candidate-form').reset();
+                    loadData();
+                } else {
+                    showAlert('❌ Thêm thí sinh thất bại!', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        });
+
+        document.getElementById('update-kahoot-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const candidateId = document.getElementById('kahoot_candidate').value;
+            const kahoot = document.getElementById('kahoot_score').value;
+
+            if (!candidateId) {
+                showAlert('❌ Vui lòng chọn Thí sinh để cập nhật điểm Kahoot!', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/admin/update-kahoot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ candidateId, kahoot })
+                });
+
+                if (res.ok) {
+                    showAlert('✅ Đã cập nhật điểm Kahoot thành công!');
+                    document.getElementById('update-kahoot-form').reset();
+                    loadData();
+                } else {
+                    showAlert('❌ Cập nhật điểm Kahoot thất bại!', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        });
+
+        async function toggleUserStatus(username) {
+            if (!confirm(`Bạn có chắc chắn muốn thay đổi trạng thái của tài khoản "${username}" không?`)) return;
+
+            try {
+                const res = await fetch('/admin/toggle-user-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ username })
+                });
+
+                if (res.ok) {
+                    showAlert(`✅ Đã thay đổi trạng thái tài khoản "${username}".`);
+                    loadData();
+                } else {
+                    showAlert('❌ Đổi trạng thái thất bại.', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        }
+
+        async function deleteUser(username) {
+            if (!confirm(`⚠️ BẠN CÓ CHẮC CHẮN MUỐN XÓA TÀI KHOẢN "${username}" VĨNH VIỄN KHÔNG?\n\nTất cả điểm do tài khoản này chấm sẽ bị XÓA HOÀN TOÀN khỏi hệ thống!`)) return;
+
+            try {
+                const res = await fetch('/admin/delete-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ username })
+                });
+
+                if (res.ok) {
+                    showAlert(`✅ Đã xóa tài khoản "${username}" thành công.`);
+                    loadData();
+                } else {
+                    showAlert('❌ Xóa tài khoản thất bại.', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        }
+
+        async function deleteTeam(teamId, teamName) {
+            if (!confirm(`Bạn có chắc chắn muốn xóa Đội "${teamName}" không? Toàn bộ thí sinh và điểm liên quan của đội này cũng sẽ bị xóa hoàn toàn.`)) return;
+
+            try {
+                const res = await fetch('/admin/delete-team', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ teamId })
+                });
+
+                if (res.ok) {
+                    showAlert(`✅ Đã xóa Đội "${teamName}" thành công.`);
+                    loadData();
+                } else {
+                    showAlert('❌ Xóa đội thất bại.', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        }
+
+        async function deleteCandidate(candidateId) {
+            if (!confirm('Bạn có chắc chắn muốn xóa thí sinh này không?')) return;
+
+            try {
+                const res = await fetch('/admin/delete-candidate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ candidateId })
+                });
+
+                if (res.ok) {
+                    showAlert('✅ Đã xóa thí sinh thành công.');
+                    loadData();
+                } else {
+                    showAlert('❌ Xóa thí sinh thất bại.', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối máy chủ!', 'error');
+            }
+        }
+
+        function handleExcelImport() {
+            const fileInput = document.getElementById('excel-file-input');
+            const previewArea = document.getElementById('excel-preview-area');
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showAlert('❌ Vui lòng chọn file Excel trước!', 'error');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    if (rows.length === 0) {
+                        showAlert('❌ File Excel không có dữ liệu!', 'error');
+                        return;
+                    }
+
+                    const teamsMap = {};
+                    const candidatesList = [];
+
+                    let startRowIdx = 1;
+                    const firstRow = rows[0];
+                    if (firstRow && firstRow[0] && (
+                        String(firstRow[0]).toLowerCase().includes('họ tên') ||
+                        String(firstRow[0]).toLowerCase().includes('thí sinh') ||
+                        String(firstRow[0]).toLowerCase().includes('name') ||
+                        String(firstRow[0]).toLowerCase().includes('candidate') ||
+                        firstRow[2] && String(firstRow[2]).toLowerCase().includes('team') ||
+                        firstRow[2] && String(firstRow[2]).toLowerCase().includes('đội')
+                    )) {
+                        startRowIdx = 1;
+                    } else {
+                        startRowIdx = 0;
+                    }
+
+                    for (let i = startRowIdx; i < rows.length; i++) {
+                        const row = rows[i];
+                        if (!row || row.length === 0) continue;
+
+                        const candName = row[0] ? String(row[0]).trim() : '';
+                        const sbd = row[1] ? String(row[1]).trim() : '';
+                        const teamName = row[2] ? String(row[2]).trim() : '';
+                        const mentorsStr = row[3] ? String(row[3]).trim() : '';
+
+                        if (!candName && !teamName) continue;
+
+                        let mentors = [];
+                        if (mentorsStr) {
+                            mentors = mentorsStr.split(/&|,|and/).map(m => m.trim()).filter(m => m !== '');
+                        }
+
+                        if (teamName) {
+                            if (!teamsMap[teamName]) {
+                                teamsMap[teamName] = {
+                                    name: teamName,
+                                    mentors: mentors
+                                };
+                            } else {
+                                mentors.forEach(m => {
+                                    if (!teamsMap[teamName].mentors.map(x => x.toLowerCase()).includes(m.toLowerCase())) {
+                                        teamsMap[teamName].mentors.push(m);
+                                    }
+                                });
+                            }
+                        }
+
+                        if (candName && teamName) {
+                            candidatesList.push({
+                                name: candName,
+                                sbd: sbd,
+                                teamName: teamName
+                            });
+                        }
+                    }
+
+                    const detectedTeams = Object.values(teamsMap);
+                    if (detectedTeams.length === 0 && candidatesList.length === 0) {
+                        showAlert('❌ Không tìm thấy dữ liệu Đội hoặc Thí sinh hợp lệ!', 'error');
+                        return;
+                    }
+
+                    tempImportData = {
+                        teams: detectedTeams,
+                        candidates: candidatesList
+                    };
+
+                    previewArea.style.display = 'block';
+                    previewArea.innerHTML = `
+                        <h4 style="color: var(--accent-blue); margin-bottom: 0.5rem;">🔍 Kết Quả Xem Trước (Preview):</h4>
+                        <ul style="list-style-type: none; padding-left: 0; margin-bottom: 1rem;">
+                            <li>• Phát hiện <strong>${detectedTeams.length}</strong> Đội Mentor mới/đã có.</li>
+                            <li>• Phát hiện <strong>${candidatesList.length}</strong> Thí sinh mới.</li>
+                        </ul>
+                        
+                        <div style="max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 6px; margin-bottom: 1.2rem; font-size: 0.85rem;">
+                            <table style="width:100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="border-bottom:1px solid rgba(255,255,255,0.1); text-align:left;">
+                                        <th style="padding-bottom:0.3rem; width: 60px;">SBD</th>
+                                        <th style="padding-bottom:0.3rem;">Thí sinh</th>
+                                        <th style="padding-bottom:0.3rem;">Đội Mentor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${candidatesList.map(c => `
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                                            <td style="padding:0.3rem 0; font-weight:bold; color:var(--accent-blue);">${c.sbd || '-'}</td>
+                                            <td style="padding:0.3rem 0; font-weight:bold;">${c.name}</td>
+                                            <td style="padding:0.3rem 0;">${c.teamName}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="display:flex; justify-content: flex-end; gap:0.5rem;">
+                            <button type="button" class="btn-small btn-danger" onclick="cancelExcelImport()" style="margin-top:0; width:auto;">Hủy bỏ</button>
+                            <button type="button" class="btn-small btn-success" onclick="submitExcelImport()" style="margin-top:0; width:auto;">Xác Nhận Nhập Liệu</button>
+                        </div>
+                    `;
+
+                } catch (err) {
+                    console.error(err);
+                    showAlert('❌ Lỗi khi đọc file Excel. Vui lòng kiểm tra lại cấu trúc file!', 'error');
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function cancelExcelImport() {
+            tempImportData = null;
+            document.getElementById('excel-file-input').value = '';
+            document.getElementById('excel-preview-area').style.display = 'none';
+            document.getElementById('excel-preview-area').innerHTML = '';
+        }
+
+        async function submitExcelImport() {
+            if (!tempImportData) return;
+
+            try {
+                const res = await fetch('/admin/import-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ data: JSON.stringify(tempImportData) })
+                });
+
+                if (res.ok) {
+                    showAlert('✅ Đã nhập dữ liệu Đội & Thí sinh từ Excel thành công!');
+                    cancelExcelImport();
+                    loadData();
+                } else {
+                    showAlert('❌ Nhập dữ liệu thất bại!', 'error');
+                }
+            } catch (err) {
                 showAlert('❌ Lỗi kết nối máy chủ!', 'error');
             }
         }
@@ -1138,6 +1359,25 @@
                     loadData();
                 }
             }, 10000);
+        }
+
+        async function toggleR6(candidateId, selected) {
+            try {
+                const res = await fetch('/admin/toggle-r6', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ candidateId, selected })
+                });
+                if (res.ok) {
+                    const c = appData.candidates.find(x => x.id === candidateId);
+                    if (c) c.selectedForR6 = selected;
+                    showAlert('✅ Đã cập nhật quyền thi Vòng 6!');
+                } else {
+                    showAlert('❌ Cập nhật thất bại!', 'error');
+                }
+            } catch (err) {
+                showAlert('❌ Lỗi kết nối!', 'error');
+            }
         }
 
         async function toggleR7(candidateId, selected) {
