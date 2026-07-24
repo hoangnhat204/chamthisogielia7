@@ -558,7 +558,33 @@
             if (currentCandidateIndex >= candidates.length) currentCandidateIndex = candidates.length - 1;
 
             const cand = candidates[currentCandidateIndex];
-            document.getElementById('cand-name-text').textContent = (cand.sbd ? `[SBD ${cand.sbd}] ` : '') + cand.name;
+            const candNameEl = document.getElementById('cand-name-text');
+            candNameEl.textContent = (cand.sbd ? `[SBD ${cand.sbd}] ` : '') + cand.name;
+
+            if (currentRoundPhase === 3) {
+                const nameLower = cand.name.toLowerCase();
+                const words = nameLower.split(/[\s,]+/);
+                const isMatch = (keyword) => keyword.includes(' ') ? nameLower.includes(keyword) : words.includes(keyword);
+                
+                let topic = "";
+                if (isMatch("phú vinh") || isMatch("tuyền") || isMatch("đạt") || isMatch("hải") || isMatch("chi") || isMatch("vinh") || isMatch("khang") || isMatch("vi")) {
+                    topic = "CHỦ ĐỀ : QUA LĂNG KÍNH CỦA TÔI. BẠN CHỌN: NIỀM TIN";
+                } else if (isMatch("kiều băng") || isMatch("minh minh") || isMatch("phúc") || isMatch("ngọc") || isMatch("khanh") || isMatch("huỳnh") || isMatch("đệ")) {
+                    topic = "CHỦ ĐỀ : QUA LĂNG KÍNH CỦA TÔI. BẠN CHỌN: BƯỚC NGOẶC";
+                } else if (isMatch("ý") || isMatch("thức") || isMatch("khôi")) {
+                    topic = "CHỦ ĐỀ : QUA LĂNG KÍNH CỦA TÔI. BẠN CHỌN: DẤU ẤN";
+                }
+                
+                if (topic) {
+                    const topicSpan = document.createElement('span');
+                    topicSpan.style.fontSize = '1rem';
+                    topicSpan.style.color = 'var(--accent-blue)';
+                    topicSpan.style.display = 'block';
+                    topicSpan.style.marginTop = '0.3rem';
+                    topicSpan.textContent = topic;
+                    candNameEl.appendChild(topicSpan);
+                }
+            }
 
             const total = candidates.length;
             const step = currentCandidateIndex + 1;
