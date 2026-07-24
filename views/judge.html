@@ -432,21 +432,6 @@
 
                     appData = newData;
 
-                    if (appData.scoringMode && appData.scoringMode !== 'all') {
-                        let newPhase = 1;
-                        if (appData.scoringMode === 'r6') newPhase = 2;
-                        if (appData.scoringMode === 'r7') newPhase = 3;
-                        if (appData.scoringMode === 'rThuThach') newPhase = 4;
-                        
-                        if (currentRoundPhase !== newPhase || modeChanged) {
-                            currentRoundPhase = newPhase;
-                            if (modeChanged) {
-                                auto = true; 
-                                silent = false;
-                            }
-                        }
-                    }
-
                     if (!silent) {
                         if (auto) resumeProgress(); else renderWizard();
                     } else if (modeChanged || scoresArchived) {
