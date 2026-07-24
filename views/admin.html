@@ -1390,8 +1390,8 @@
             try {
                 const res = await fetch('/admin/toggle-r6', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({ candidateId, selected })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ candidateId, selected })
                 });
                 if (res.ok) {
                     const c = appData.candidates.find(x => x.id === candidateId);
@@ -1409,8 +1409,8 @@
             try {
                 const res = await fetch('/admin/toggle-r7', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({ candidateId, selected })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ candidateId, selected })
                 });
                 if (res.ok) {
                     const c = appData.candidates.find(x => x.id === candidateId);
